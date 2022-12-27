@@ -1,17 +1,17 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <MainPage></MainPage>
 </template>
 
-<script>
-import HelloWorld from './components/HelloWorld.vue'
+<script lang="ts">
+import { Options, Vue } from 'vue-class-component';
+import MainPage from './components/Main.vue';
 
-export default {
-  name: 'App',
+@Options({
   components: {
-    HelloWorld
-  }
-}
+    MainPage,
+  },
+})
+export default class App extends Vue { }
 </script>
 
 <style>
@@ -19,8 +19,15 @@ export default {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+}
+
+body {
+  --primary: #2E2E2E;
+  --buttons: #657beb;
+  --secondary: #3E3E3E;
+  background-color: var(--primary);
+  background-image: url(@/assets/gengar.png);
+  background-position: center;
+  background-size: contain;
 }
 </style>
