@@ -1,4 +1,5 @@
 import { cartridge } from "./cardridge";
+import { bootrom } from "./bootrom";
 
 export class GAMEBOYCOLOR {
   canvas: HTMLCanvasElement;
@@ -8,17 +9,22 @@ export class GAMEBOYCOLOR {
   isStarted: boolean;
   paused: boolean;
   cardridge: cartridge;
+  bootrom: bootrom;
+  cycles: number;
 
   constructor(canvas: HTMLCanvasElement, debugMode: boolean) {
     this.canvas = canvas;
     this.maxFps = 1000 / 59.7;
 
-    //variables de control
     this.debugMode = debugMode;
     this.isStarted = false;
     this.fps = 0;
     this.paused = false;
+
     this.cardridge = new cartridge();
+    this.bootrom = new bootrom();
+
+    this.cycles = 0;
   }
 
   start() {
@@ -61,7 +67,11 @@ export class GAMEBOYCOLOR {
     const rom = new Uint8ClampedArray(game);
     this.cardridge.setRom(rom);
   }
-  loadBootrom() {}
+
+  loadBootrom(bootromvar: ArrayBuffer) {
+    const rom = new Uint8ClampedArray(bootromvar);
+    this.bootrom.setRom(rom);
+  }
 
   pause() {
     this.paused = true;
@@ -74,6 +84,7 @@ export class GAMEBOYCOLOR {
   }
 
   reset() {
-    //resetear todas las variables
+    this.cardridge = new cartridge();
+    this.bootrom = new bootrom();
   }
 }

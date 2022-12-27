@@ -16,6 +16,7 @@ export class cartridge {
   checkSumValid: boolean;
   ramBanks: Uint8ClampedArray[];
   ramBanksCount: number;
+  isRomLoaded: boolean;
 
   constructor() {
     this.title = "";
@@ -28,10 +29,12 @@ export class cartridge {
     this.checkSumValid = false;
     this.ramBanks = [];
     this.ramBanksCount = 0;
+    this.isRomLoaded = false;
   }
 
   setRom(rom: Uint8ClampedArray) {
     this.rom = rom;
+    this.isRomLoaded = true;
     this.title = this.getTitle();
     this.compatibility = this.getCompatibility();
     this.license = this.getLicense()!;

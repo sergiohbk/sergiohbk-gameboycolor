@@ -19,21 +19,19 @@
             <canvas></canvas>
         </div>
     </div>
-    <div>
-    </div>
-    <section class="section1">
-        <div v-if="GBC?.cardridge.rom" class="cardridgeinfo">
-            <div class="column">
+    <section class="flexrow margin">
+        <div v-if="GBC?.cardridge.isRomLoaded" class="cardridgeinfo">
+            <div class="flexcolumn flexalignleft">
                 <span class="title">Juego</span>
                 <hr style="width:100%">
                 <span class="title">Titulo</span>
-                <span>{{ GBC?.cardridge.title }}</span>
+                <span class="paddingleft">{{ GBC?.cardridge.title }}</span>
                 <span class="title">Compatibilidad</span>
-                <span>{{ GBC?.cardridge.compatibility }}</span>
+                <span class="paddingleft">{{ GBC?.cardridge.compatibility }}</span>
                 <span class="title">Licencia</span>
-                <span>{{ GBC?.cardridge.license }}</span>
+                <span class="paddingleft">{{ GBC?.cardridge.license }}</span>
                 <span class="title">Tipo de cartucho</span>
-                <div style="display:flex, flex-direction:column; gap: 0.3rem">
+                <div class="paddingleft" style="display:flex, flex-direction:column; gap: 0.3rem">
                     <span v-if="GBC?.cardridge.cardType[0]">{{ GBC?.cardridge.cardType[0].name }}</span>
                     <span v-else>{{ GBC?.cardridge.cardType }}</span>
                     <span v-if="GBC?.cardridge.cardType[1]"> SRAM </span>
@@ -42,25 +40,29 @@
                     <span v-if="GBC?.cardridge.cardType[4]"> RUMBLE </span>
                 </div>
             </div>
-            <div class="column">
+            <div class="flexcolumn flexalignleft">
                 <span class="title">Tamaño de la ROM</span>
-                <span>{{ GBC?.cardridge.rom.length }} bytes</span>
-                <span>{{ GBC?.cardridge.romBanksCount }} bancos de memoria</span>
+                <span class="paddingleft">{{ GBC?.cardridge.rom?.length }} bytes</span>
+                <span class="paddingleft">{{ GBC?.cardridge.romBanksCount }} bancos de memoria</span>
                 <span v-if="GBC?.cardridge.ramBanksCount !== 0" class="title">Tamaño de la RAM</span>
-                <span v-if="GBC?.cardridge.ramBanksCount !== 0">{{ GBC?.cardridge.ramBanksCount }} bancos de ram</span>
+                <span class="paddingleft" v-if="GBC?.cardridge.ramBanksCount !== 0">{{ GBC?.cardridge.ramBanksCount }}
+                    bancos de ram</span>
                 <span class="title">Checksum valido</span>
-                <span>{{ GBC?.cardridge.checkSumValid }}</span>
+                <span class="paddingleft">{{ GBC?.cardridge.checkSumValid }}</span>
             </div>
         </div>
-        <div class="main-options">
-            <span class="title">Opciones de juego</span>
-            <div class="load-options">
+        <div class="flexcolumn border padding">
+            <span class="title padding">Opciones de juego</span>
+            <div class="flexrow">
                 <input id="inputgame" type="file" @change="loadGame" style="display:none" />
-                <button class="load-game" onclick="document.getElementById('inputgame').click()"><span>Cargar
+                <button class="ibutton" onclick="document.getElementById('inputgame').click()"><span>Cargar
                         juego</span></button>
+                <input id="inputboot" type="file" @change="loadBoot" style="display:none" />
+                <button class="ibutton" onclick="document.getElementById('inputboot').click()"><span>Cargar
+                        GAMEBOYCOLOR intro</span></button>
             </div>
-            <span class="title">Control del juego</span>
-            <div class="control-options">
+            <span v-if="GBC?.cardridge.isRomLoaded" class="title">Control del juego</span>
+            <div v-if="GBC?.cardridge.isRomLoaded" class="flexrow">
                 <button @click="GBC?.start"><span>start</span></button>
                 <button @click="GBC?.stop"><span>stop</span></button>
                 <button v-if="debug" @click="GBC?.pause"><span>pause</span></button>
@@ -68,24 +70,46 @@
             </div>
         </div>
     </section>
-    <section class="section2">
-        <div class="operations">
-            <div class="general-options">
+    <section class="flexrow margin">
+        <div class="flexcolumn border padding">
+            <div class="flexcolumn">
                 <button @click="setDebug">
-                    <span v-if="debug">desactivar modo debug</span>
-                    <span v-else>activar modo debug</span>
+                    <span v-if="debug">Desactivar modo debug</span>
+                    <span v-else>Activar modo debug</span>
                 </button>
+                <div v-if="GBC?.bootrom.isBootromLoaded">
+                    <h2 class="no-margin no-padding">BootRom</h2>
+                </div>
+                <div v-if="GBC?.bootrom.isBootromLoaded"><span>Gameboy color intro esta cargada</span> </div>
             </div>
-            <div class="screen-options">
-                <div class="size">
+            <div class="flexcolumn">
+                <div class="flexrow border padding">
                     <span>modifica el tamaño de la pantallas</span>
                     <button @click="setDoubleSize"><span>+</span></button>
                     <button @click="setHalfSize"><span>-</span></button>
                 </div>
             </div>
         </div>
+        <div v-if="debug" class="flexcolumn flexalignleft border padding">
+            <span class="title ">Variables generales</span>
+            <hr style="width:100%">
+            <table class="border padding">
+                <tr>
+                    <td>cycles </td>
+                    <td>{{ GBC?.cycles }}</td>
+                </tr>
+                <tr>
+                    <td>
+                        fps
+                    </td>
+                    <td>
+                        {{ fps }}
+                    </td>
+                </tr>
+            </table>
+        </div>
     </section>
-    <section class="section3">
+    <section class="flexrow margin">
     </section>
 </template>
 <script lang="ts">
@@ -140,6 +164,22 @@ export default {
             }
         }
 
+        function loadBoot(event: any) {
+            if (GBC) {
+                const file = event.target.files[0];
+                if (!file) return;
+                if (file.name.split('.').pop() !== 'bin' && file.name.split('.').pop() !== 'gbc') {
+                    alert('El archivo no es de tipo .bin o .gbc')
+                    return;
+                }
+                const reader = new FileReader();
+                reader.readAsArrayBuffer(file);
+                reader.onload = () => {
+                    GBC.value!.loadBootrom(reader.result as ArrayBuffer)
+                }
+            }
+        }
+
         function setHalfSize() {
             screenHeight.value = `${parseInt(screenHeight.value) / 2}px`;
             screenWidth.value = `${parseInt(screenWidth.value) / 2}px`;
@@ -167,7 +207,8 @@ export default {
             screen,
             fps,
             GBCstarted,
-            loadGame
+            loadGame,
+            loadBoot
         }
     },
 }
@@ -181,7 +222,6 @@ export default {
     align-content: flex-start;
     gap: 1rem;
 }
-
 
 canvas {
     height: v-bind(screenHeight);
@@ -207,43 +247,82 @@ button {
     cursor: pointer;
 }
 
-span {
+button>span {
     font: 700 1rem sans-serif;
     color: white;
-
 }
 
-h2 {
-    padding: none;
-    margin: none;
+button:hover {
+    background-color: var(--buttons-hover);
 }
 
-h3 {
-    font: 700 sans-serif;
-    color: black;
+button:active {
+    background-color: var(--buttons-active);
 }
 
-.operations {
-    display: flex;
-    flex-wrap: wrap;
-    flex-direction: row;
-    justify-content: center;
-    align-content: flex-start;
-    gap: 1rem;
-    padding: 0.5rem;
+.ibutton {
+    background-color: var(--important-buttons);
+}
+
+.ibutton>span {
+    font: 900 1.2rem sans-serif;
+    color: royalblue;
+}
+
+.ibutton:hover {
+    background-color: var(--important-buttons-hover);
+}
+
+.ibutton:active {
+    background-color: var(--important-buttons-active);
+}
+
+.border {
     border: 0.2rem dashed #FFF;
     background-color: var(--secondary);
 }
 
-.size {
+.padding {
+    padding: 0.5rem;
+}
+
+.paddingleft {
+    padding-left: 0.5rem;
+}
+
+.margin {
+    margin: 0.5rem;
+}
+
+.no-margin {
+    margin: 0;
+}
+
+.no-padding {
+    padding: 0;
+}
+
+.flexcolumn {
     display: flex;
-    border: 1px solid white;
-    padding: 0.3rem;
+    flex-direction: column;
     gap: 0.5rem;
-    border-radius: 0.2rem;
     align-items: center;
     flex-wrap: wrap;
     align-content: center;
+}
+
+.flexrow {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+}
+
+.flexalignleft {
+    align-items: flex-start;
+    justify-content: flex-start;
 }
 
 .canvas3 {
@@ -259,37 +338,6 @@ h3 {
     top: 0.1rem;
 }
 
-.control-options {
-    display: flex;
-    flex-wrap: wrap;
-    flex-direction: row;
-    justify-content: center;
-    align-content: flex-start;
-    gap: 1rem;
-    padding: 0.5rem;
-}
-
-.load-options {
-    display: flex;
-    flex-wrap: wrap;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 0.5rem;
-}
-
-.general-options {
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
-}
-
-.screen-options {
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
-}
-
 .cardridgeinfo {
     display: flex;
     flex-wrap: wrap;
@@ -302,57 +350,13 @@ h3 {
     gap: 0.5rem;
 }
 
-.section1,
-.section2,
-.section3 {
-    display: flex;
-    flex-wrap: wrap;
-    flex-direction: row;
-    justify-content: flex-start;
-    align-items: center;
-    align-content: center;
-    gap: 1rem;
-    padding: 0.5rem;
-    margin: 0.5rem;
-}
-
-.section1 {
-    justify-content: center;
-}
-
-.column {
-    display: flex;
-    flex-wrap: wrap;
-    flex-direction: column;
-    gap: 0.3rem;
-    justify-content: flex-start;
-    align-items: flex-start;
-    padding: 0.5rem;
-}
-
 .title {
     font: 900 1.5rem sans-serif;
     color: white;
 }
 
-.load-game {
-    background-color: cyan;
-
-}
-
-.load-game>span {
-    color: darkgoldenrod;
-}
-
-.main-options {
-    display: flex;
-    flex-wrap: wrap;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 1rem;
-    padding: 0.5rem;
-    border: 0.2rem dashed #FFF;
-    background-color: var(--secondary);
+span {
+    font: 600 1rem sans-serif;
+    color: white;
 }
 </style>
