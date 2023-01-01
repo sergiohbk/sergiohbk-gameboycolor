@@ -7,7 +7,7 @@
             <canvas></canvas>
         </div>
         <div class="canvas3">
-            <div v-if="GBCstarted" class="fps">
+            <div v-if="GBC?.isStarted && debug" class="fps">
                 <h3>{{ fps }}</h3>
             </div>
             <canvas id="screen"></canvas>
@@ -20,35 +20,35 @@
         </div>
     </div>
     <section class="flexrow margin">
-        <div v-if="GBC?.cardridge.isRomLoaded" class="cardridgeinfo">
+        <div v-if="GBC?.cartridge.isRomLoaded" class="cardridgeinfo">
             <div class="flexcolumn flexalignleft">
                 <span class="title">Juego</span>
                 <hr style="width:100%">
                 <span class="title">Titulo</span>
-                <span class="paddingleft">{{ GBC?.cardridge.title }}</span>
+                <span class="paddingleft">{{ GBC?.cartridge.title }}</span>
                 <span class="title">Compatibilidad</span>
-                <span class="paddingleft">{{ GBC?.cardridge.compatibility }}</span>
+                <span class="paddingleft">{{ GBC?.cartridge.compatibility }}</span>
                 <span class="title">Licencia</span>
-                <span class="paddingleft">{{ GBC?.cardridge.license }}</span>
+                <span class="paddingleft">{{ GBC?.cartridge.license }}</span>
                 <span class="title">Tipo de cartucho</span>
                 <div class="paddingleft" style="display:flex, flex-direction:column; gap: 0.3rem">
-                    <span v-if="GBC?.cardridge.cardType[0]">{{ GBC?.cardridge.cardType[0].name }}</span>
-                    <span v-else>{{ GBC?.cardridge.cardType }}</span>
-                    <span v-if="GBC?.cardridge.cardType[1]"> SRAM </span>
-                    <span v-if="GBC?.cardridge.cardType[2]"> BATTERY </span>
-                    <span v-if="GBC?.cardridge.cardType[3]"> TIMER </span>
-                    <span v-if="GBC?.cardridge.cardType[4]"> RUMBLE </span>
+                    <span v-if="GBC?.cartridge.cardType[0]">{{ GBC?.cartridge.cardType[0].name }}</span>
+                    <span v-else>{{ GBC?.cartridge.cardType }}</span>
+                    <span v-if="GBC?.cartridge.cardType[1]"> SRAM </span>
+                    <span v-if="GBC?.cartridge.cardType[2]"> BATTERY </span>
+                    <span v-if="GBC?.cartridge.cardType[3]"> TIMER </span>
+                    <span v-if="GBC?.cartridge.cardType[4]"> RUMBLE </span>
                 </div>
             </div>
             <div class="flexcolumn flexalignleft">
                 <span class="title">Tamaño de la ROM</span>
-                <span class="paddingleft">{{ GBC?.cardridge.rom?.length }} bytes</span>
-                <span class="paddingleft">{{ GBC?.cardridge.romBanksCount }} bancos de memoria</span>
-                <span v-if="GBC?.cardridge.ramBanksCount !== 0" class="title">Tamaño de la RAM</span>
-                <span class="paddingleft" v-if="GBC?.cardridge.ramBanksCount !== 0">{{ GBC?.cardridge.ramBanksCount }}
+                <span class="paddingleft">{{ GBC?.cartridge.rom?.length }} bytes</span>
+                <span class="paddingleft">{{ GBC?.cartridge.romBanksCount }} bancos de memoria</span>
+                <span v-if="GBC?.cartridge.ramBanksCount !== 0" class="title">Tamaño de la RAM</span>
+                <span class="paddingleft" v-if="GBC?.cartridge.ramBanksCount !== 0">{{ GBC?.cartridge.ramBanksCount }}
                     bancos de ram</span>
                 <span class="title">Checksum valido</span>
-                <span class="paddingleft">{{ GBC?.cardridge.checkSumValid }}</span>
+                <span class="paddingleft">{{ GBC?.cartridge.checkSumValid }}</span>
             </div>
         </div>
         <div class="flexcolumn border padding">
@@ -61,8 +61,8 @@
                 <button class="ibutton" onclick="document.getElementById('inputboot').click()"><span>Cargar
                         GAMEBOYCOLOR intro</span></button>
             </div>
-            <span v-if="GBC?.cardridge.isRomLoaded" class="title">Control del juego</span>
-            <div v-if="GBC?.cardridge.isRomLoaded" class="flexrow">
+            <span v-if="GBC?.cartridge.isRomLoaded" class="title">Control del juego</span>
+            <div v-if="GBC?.cartridge.isRomLoaded" class="flexrow">
                 <button @click="GBC?.start"><span>start</span></button>
                 <button @click="GBC?.stop"><span>stop</span></button>
                 <button v-if="debug" @click="GBC?.pause"><span>pause</span></button>
@@ -106,6 +106,14 @@
                         {{ fps }}
                     </td>
                 </tr>
+                <tr>
+                    <td>
+                        Double speed
+                    </td>
+                    <td>
+                        {{ GBC?.doubleSpeed }}
+                    </td>
+                </tr>
             </table>
         </div>
     </section>
@@ -124,7 +132,6 @@ export default {
         let screenWidth = ref<string>("288px")
         let GBC = ref<GAMEBOYCOLOR | null>(null)
         let fps = ref<number>(0)
-        let GBCstarted = ref<boolean>(false)
 
         onMounted(() => {
             GBC.value = new GAMEBOYCOLOR(document.getElementById('screen') as HTMLCanvasElement, debug.value)
@@ -136,11 +143,6 @@ export default {
             }
         })
 
-        watch(() => GBC.value?.isStarted, () => {
-            if (GBC) {
-                GBCstarted.value = GBC.value!.isStarted
-            }
-        })
         watchEffect(() => {
             setInterval(() => {
                 fps.value = Math.trunc(GBC.value!.fps)
@@ -206,7 +208,6 @@ export default {
             setDebug,
             screen,
             fps,
-            GBCstarted,
             loadGame,
             loadBoot
         }
@@ -336,6 +337,8 @@ button:active {
     right: 1rem;
     z-index: 2;
     top: 0.1rem;
+    font: 600 0.6rem sans-serif;
+    color: black;
 }
 
 .cardridgeinfo {

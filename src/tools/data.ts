@@ -1,3 +1,6 @@
+import { Cartridge } from "@/GAMEBOYCOLOR/cartridge";
+import { Memory } from "@/GAMEBOYCOLOR/memory";
+
 export function getBanksFromRom(
   rom: Uint8ClampedArray,
   sliceSize: number
@@ -18,4 +21,13 @@ export function createRamBanks(
     ramBanks.push(new Uint8ClampedArray(ramBankSize));
   }
   return ramBanks;
+}
+
+export function setMBCtoMemory(memory: Memory, cartridge: Cartridge) {
+  if (cartridge.cardType[0] === null) {
+    console.log("MBC not supported");
+    return;
+  }
+  const mbcset = new cartridge.cardType[0]();
+  memory.setMBC(mbcset);
 }

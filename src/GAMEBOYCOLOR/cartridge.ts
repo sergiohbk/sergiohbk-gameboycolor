@@ -5,7 +5,7 @@ import { MBC30 } from "./MBCs/MBC30";
 import { ROMonly } from "./MBCs/ROMonly";
 import { createRamBanks, getBanksFromRom } from "@/tools/data";
 
-export class cartridge {
+export class Cartridge {
   title: string;
   rom: Uint8ClampedArray | null;
   compatibility: string;

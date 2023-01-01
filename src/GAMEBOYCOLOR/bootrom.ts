@@ -1,4 +1,4 @@
-export class bootrom {
+export class Bootrom {
   rom: Uint8ClampedArray | null;
   isActive: boolean;
   isBootromLoaded: boolean;

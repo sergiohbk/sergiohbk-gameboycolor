@@ -1,18 +1,16 @@
-import { cartridge } from "./cardridge";
-import { bootrom } from "./bootrom";
+import { setMBCtoMemory } from "@/tools/data";
+import { Components } from "./components";
 
-export class GAMEBOYCOLOR {
+export class GAMEBOYCOLOR extends Components {
   canvas: HTMLCanvasElement;
   debugMode: boolean;
   fps: number;
   maxFps: number;
   isStarted: boolean;
   paused: boolean;
-  cardridge: cartridge;
-  bootrom: bootrom;
-  cycles: number;
 
   constructor(canvas: HTMLCanvasElement, debugMode: boolean) {
+    super(debugMode);
     this.canvas = canvas;
     this.maxFps = 1000 / 59.7;
 
@@ -20,11 +18,6 @@ export class GAMEBOYCOLOR {
     this.isStarted = false;
     this.fps = 0;
     this.paused = false;
-
-    this.cardridge = new cartridge();
-    this.bootrom = new bootrom();
-
-    this.cycles = 0;
   }
 
   start() {
@@ -34,16 +27,16 @@ export class GAMEBOYCOLOR {
   }
 
   update() {
-    let lastUpdateTime = performance.now();
-    const startTime = performance.now();
-    let frameCount = 0;
+    let lastUpdateTime: number = performance.now();
+    const startTime: number = performance.now();
+    let frameCount: number = 0;
 
     requestAnimationFrame((time) => runframe(time));
 
     const runframe = (time: number) => {
       if (!this.isStarted || this.paused) return;
-      const now = time;
-      const elapsed = now - lastUpdateTime;
+      const now: number = time;
+      const elapsed: number = now - lastUpdateTime;
 
       if (elapsed > this.maxFps) {
         lastUpdateTime = now - (elapsed % this.maxFps);
@@ -65,7 +58,8 @@ export class GAMEBOYCOLOR {
 
   load(game: ArrayBuffer) {
     const rom = new Uint8ClampedArray(game);
-    this.cardridge.setRom(rom);
+    this.cartridge.setRom(rom);
+    setMBCtoMemory(this.memory, this.cartridge);
   }
 
   loadBootrom(bootromvar: ArrayBuffer) {
@@ -84,7 +78,7 @@ export class GAMEBOYCOLOR {
   }
 
   reset() {
-    this.cardridge = new cartridge();
-    this.bootrom = new bootrom();
+    super.reset();
+    this.fps = 0;
   }
 }
