@@ -14,7 +14,7 @@ export class Cartridge {
   romBanks: Uint8ClampedArray[];
   romBanksCount: number;
   checkSumValid: boolean;
-  ramBanks: Uint8ClampedArray[];
+  ramBanks: Uint8ClampedArray[]; // A000 - BFFF
   ramBanksCount: number;
   isRomLoaded: boolean;
 
@@ -27,7 +27,7 @@ export class Cartridge {
     this.romBanks = [];
     this.romBanksCount = 0;
     this.checkSumValid = false;
-    this.ramBanks = [];
+    this.ramBanks = []; // A000 - BFFF
     this.ramBanksCount = 0;
     this.isRomLoaded = false;
   }

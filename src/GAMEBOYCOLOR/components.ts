@@ -22,18 +22,18 @@ export class Components {
   doubleSpeed: boolean;
 
   constructor(debug?: boolean) {
+    this.debug = debug || false;
+    this.cycles = 0;
+    this.doubleSpeed = false;
+
     this.memory = new Memory();
     this.cartridge = new Cartridge();
     this.bootrom = new Bootrom();
-    this.cpu = new CPU();
+    this.cpu = new CPU(this.memory, this.cycles);
     this.ppu = new PPU();
     this.apu = new APU();
     this.controller = new Controller();
     this.linkcable = new LinkCable();
-
-    this.debug = debug || false;
-    this.cycles = 0;
-    this.doubleSpeed = false;
   }
 
   reset() {

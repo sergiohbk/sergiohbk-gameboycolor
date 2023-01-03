@@ -90,34 +90,100 @@
                 </div>
             </div>
         </div>
-        <div v-if="debug" class="flexcolumn flexalignleft border padding">
-            <span class="title ">Variables generales</span>
-            <hr style="width:100%">
-            <table class="border padding">
-                <tr>
-                    <td>cycles </td>
-                    <td>{{ GBC?.cycles }}</td>
-                </tr>
-                <tr>
-                    <td>
-                        fps
-                    </td>
-                    <td>
-                        {{ fps }}
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Double speed
-                    </td>
-                    <td>
-                        {{ GBC?.doubleSpeed }}
-                    </td>
-                </tr>
+    </section>
+    <section v-if="debug" class="flexrow margin">
+        <div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>General Data</th>
+                    </tr>
+                </thead>
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Valor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Cycles</td>
+                        <td>{{ GBC?.cycles }}</td>
+                    </tr>
+                    <tr>
+                        <td>Fps</td>
+                        <td>{{ fps }}</td>
+                    </tr>
+                    <tr>
+                        <td>Double speed</td>
+                        <td>{{ GBC?.doubleSpeed }}</td>
+                    </tr>
+                </tbody>
             </table>
         </div>
-    </section>
-    <section class="flexrow margin">
+        <table>
+            <thead>
+                <tr>
+                    <th>CPU registers</th>
+                </tr>
+            </thead>
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Valor</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>PC</td>
+                    <td>{{ GBC?.cpu.PC.toString(16) }}</td>
+                </tr>
+                <tr>
+                    <td>SP</td>
+                    <td>{{ GBC?.cpu.SP.toString(16) }}</td>
+                </tr>
+                <tr>
+                    <td>A</td>
+                    <td>{{ GBC?.cpu.A.toString(16) }}</td>
+                </tr>
+                <tr>
+                    <td>BC</td>
+                    <td>{{ GBC?.cpu.B.toString(16) }}{{ GBC?.cpu.C.toString(16) }}</td>
+                </tr>
+                <tr>
+                    <td>DE</td>
+                    <td>{{ GBC?.cpu.D.toString(16) }}{{ GBC?.cpu.E.toString(16) }}</td>
+                </tr>
+                <tr>
+                    <td>HL</td>
+                    <td>{{ GBC?.cpu.H.toString(16) }}{{ GBC?.cpu.L.toString(16) }}</td>
+                </tr>
+                <tr>
+                    <td>zero flag</td>
+                    <td>{{ GBC?.cpu.zeroFlag }}</td>
+                </tr>
+                <tr>
+                    <td>subtract flag</td>
+                    <td>{{ GBC?.cpu.subtractFlag }}</td>
+                </tr>
+                <tr>
+                    <td>half carry flag</td>
+                    <td>{{ GBC?.cpu.halfCarryFlag }}</td>
+                </tr>
+                <tr>
+                    <td>carry flag</td>
+                    <td>{{ GBC?.cpu.carryFlag }}</td>
+                </tr>
+                <tr>
+                    <td>Stack length</td>
+                    <td>{{ GBC?.cpu.stack.length }}</td>
+                </tr>
+                <tr v-if="GBC?.cpu.stack.length">
+                    <td>Stack</td>
+                    <td>{{ GBC?.cpu.stack[GBC?.cpu.stack.length - 1].toString(16) }}</td>
+                </tr>
+            </tbody>
+        </table>
     </section>
 </template>
 <script lang="ts">
@@ -361,5 +427,43 @@ button:active {
 span {
     font: 600 1rem sans-serif;
     color: white;
+}
+
+/* table design */
+table {
+    table-layout: fixed;
+    border-collapse: collapse;
+    border: 1px solid white;
+    background-color: darkgrey;
+    max-width: 300px;
+}
+
+th,
+td {
+    padding: 0.5rem;
+    text-align: left;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-weight: 600;
+}
+
+thead {
+    background-color: var(--secondary);
+    color: white;
+}
+
+thead tr {
+    display: block;
+    position: relative;
+}
+
+tr:nth-child(even) {
+    background-color: var(--secondary);
+}
+
+tbody {
+    display: block;
+    overflow: auto;
+    width: 100%;
+    max-height: 250px;
 }
 </style>
