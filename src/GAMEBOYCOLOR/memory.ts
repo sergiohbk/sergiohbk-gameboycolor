@@ -48,6 +48,7 @@ export class Memory {
   }
 
   resetAllMemory() {
+    this.mem.fill(0xff);
     this.VRAM[0].fill(0xff);
     this.VRAM[1].fill(0xff);
     this.WORKRAM.fill(0xff);
@@ -64,7 +65,16 @@ export class Memory {
     this.IE = 0;
   }
 
-  write(value: number, address: number) {}
+  write(address: number, value: number) {
+    if (value > 0xff) {
+      throw new Error("Value is greater than 0xff");
+    }
+    if (address > 0xffff) {
+      throw new Error("Address is greater than 0xffff");
+    }
+  }
 
-  read(address: number) {}
+  read(address: number): number {
+    return 0xff;
+  }
 }

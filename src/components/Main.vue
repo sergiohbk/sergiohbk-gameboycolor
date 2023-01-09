@@ -91,7 +91,7 @@
             </div>
         </div>
     </section>
-    <section v-if="debug" class="flexrow margin">
+    <section v-if="debug" class="flexrow debug border padding">
         <div>
             <table>
                 <thead>
@@ -175,12 +175,8 @@
                     <td>{{ GBC?.cpu.carryFlag }}</td>
                 </tr>
                 <tr>
-                    <td>Stack length</td>
-                    <td>{{ GBC?.cpu.stack.length }}</td>
-                </tr>
-                <tr v-if="GBC?.cpu.stack.length">
-                    <td>Stack</td>
-                    <td>{{ GBC?.cpu.stack[GBC?.cpu.stack.length - 1].toString(16) }}</td>
+                    <td>ultimo valor stack</td>
+                    <td>{{ GBC?.memory.mem[GBC?.cpu.SP - 1] }}</td>
                 </tr>
             </tbody>
         </table>
@@ -427,6 +423,17 @@ button:active {
 span {
     font: 600 1rem sans-serif;
     color: white;
+}
+
+.debug {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 1rem;
+    width: 90%;
+    height: auto;
 }
 
 /* table design */

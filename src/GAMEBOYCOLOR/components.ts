@@ -20,16 +20,23 @@ export class Components {
   debug: boolean;
   cycles: number;
   doubleSpeed: boolean;
+  gbcmode: boolean;
 
   constructor(debug?: boolean) {
     this.debug = debug || false;
     this.cycles = 0;
     this.doubleSpeed = false;
+    this.gbcmode = false;
 
     this.memory = new Memory();
     this.cartridge = new Cartridge();
     this.bootrom = new Bootrom();
-    this.cpu = new CPU(this.memory, this.cycles);
+    this.cpu = new CPU(
+      this.memory,
+      this.cycles,
+      this.doubleSpeed,
+      this.gbcmode
+    );
     this.ppu = new PPU();
     this.apu = new APU();
     this.controller = new Controller();
