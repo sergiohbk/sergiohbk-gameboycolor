@@ -390,8 +390,193 @@ export class CPU {
         this.cycles += 4;
         break;
       case 0x18:
+        //JR r8
+        this.PC += JR(this.get8nextBits());
+        this.PC &= 0xffff;
+        this.pcIncrement(-1);
+        this.cycles += 12;
+        break;
+      case 0x19:
+        //ADD HL, DE
+        this.setHL(
+          addSub("add", this.getHL(), this.getDE(), 16, [
+            this.zeroFlag,
+            this.halfCarryFlag,
+            this.subtractFlag,
+            this.carryFlag,
+          ])
+        );
+        this.cycles += 8;
+        break;
+      case 0x1a:
+        //LD A, (DE)
+        this.A = this.memory.read(this.getDE());
+        this.cycles += 8;
+        break;
+      case 0x1b:
+        //DEC DE
+        this.setDE(IncDec("dec", this.getDE()));
+        this.cycles += 8;
+        break;
+      case 0x1c:
+        //INC E
+        this.E = IncDec("inc", this.E, [
+          this.zeroFlag,
+          this.halfCarryFlag,
+          this.subtractFlag,
+        ]);
+        this.cycles += 4;
+        break;
+      case 0x1d:
+        //DEC E
+        this.E = IncDec("dec", this.E, [
+          this.zeroFlag,
+          this.halfCarryFlag,
+          this.subtractFlag,
+        ]);
+        this.cycles += 4;
+        break;
+      case 0x1e:
+        //LD E, d8
+        this.E = this.get8nextBits();
+        this.pcIncrement(1);
+        this.cycles += 8;
+        break;
+      case 0x1f:
+        //RRA
+        this.A = rotShift("RRA", this.A, [
+          this.zeroFlag,
+          this.halfCarryFlag,
+          this.subtractFlag,
+          this.carryFlag,
+        ]);
+        this.cycles += 4;
+        break;
+      case 0x20:
+        //JR NZ, r8
+        if (!this.zeroFlag) {
+          this.PC += JR(this.get8nextBits());
+          this.PC &= 0xffff;
+          this.pcIncrement(-1);
+          this.cycles += 12;
+        } else {
+          this.pcIncrement(1);
+          this.cycles += 8;
+        }
+        break;
+      case 0x21:
+        //LD HL, d16
+        this.setHL(this.get16nextBits());
+        this.pcIncrement(2);
+        this.cycles += 12;
+        break;
+      case 0x22:
+        //LD (HL+), A
+        this.memory.write(this.getHL(), this.A);
+        this.setHL(IncDec("inc", this.getHL()));
+        this.cycles += 8;
+        break;
+      case 0x23:
+        //INC HL
+        this.setHL(IncDec("inc", this.getHL()));
+        this.cycles += 8;
+        break;
+      case 0x24:
+        //INC H
+        this.H = IncDec("inc", this.H, [
+          this.zeroFlag,
+          this.halfCarryFlag,
+          this.subtractFlag,
+        ]);
+        this.cycles += 4;
+        break;
+      case 0x25:
+        //DEC H
+        this.H = IncDec("dec", this.H, [
+          this.zeroFlag,
+          this.halfCarryFlag,
+          this.subtractFlag,
+        ]);
+        this.cycles += 4;
+        break;
+      case 0x26:
+        //LD H, d8
+        this.H = this.get8nextBits();
+        this.pcIncrement(1);
+        this.cycles += 8;
+        break;
+      case 0x27:
+        //DAA
+        DAA(this.A, [
+          this.zeroFlag,
+          this.halfCarryFlag,
+          this.subtractFlag,
+          this.carryFlag,
+        ]);
+        this.cycles += 4;
+        break;
+      case 0x28:
+        //JR Z, r8
+        if (this.zeroFlag) {
+          this.PC += JR(this.get8nextBits());
+          this.PC &= 0xffff;
+          this.pcIncrement(-1);
+          this.cycles += 12;
+        } else {
+          this.pcIncrement(1);
+          this.cycles += 8;
+        }
+        break;
+      case 0x29:
+        //ADD HL, HL
+        this.setHL(
+          addSub("add", this.getHL(), this.getHL(), 16, [
+            this.zeroFlag,
+            this.halfCarryFlag,
+            this.subtractFlag,
+            this.carryFlag,
+          ])
+        );
+        this.cycles += 8;
+        break;
+      case 0x2a:
+        //LD A, (HL+)
+        this.A = this.memory.read(this.getHL());
+        this.setHL(IncDec("inc", this.getHL()));
+        this.cycles += 8;
+        break;
+      case 0x2b:
+        //DEC HL
+        this.setHL(IncDec("dec", this.getHL()));
+        this.cycles += 8;
+        break;
+      case 0x2c:
+        //INC L
+        this.L = IncDec("inc", this.L, [
+          this.zeroFlag,
+          this.halfCarryFlag,
+          this.subtractFlag,
+        ]);
+        this.cycles += 4;
+        break;
+      case 0x2d:
+        //DEC L
+        this.L = IncDec("dec", this.L, [
+          this.zeroFlag,
+          this.halfCarryFlag,
+          this.subtractFlag,
+        ]);
+        this.cycles += 4;
+        break;
+      case 0x2e:
+        //LD L, d8
+        this.L = this.get8nextBits();
+        this.pcIncrement(1);
+        this.cycles += 8;
+        break;
+      case 0x2f:
+      //CPL
       //continuar aqui
-      //JR r8
     }
     this.pcIncrement(1);
   }
@@ -431,13 +616,14 @@ export function rotShift(
   if (op === "RLCA") result = (register << 1) | (register >> 7);
   if (op === "RRCA") result = (register >> 1) | (register << 7);
   if (op === "RLA") result = (register << 1) | (flags[3] ? 1 : 0);
+  if (op === "RRA") result = (register >> 1) | (flags[3] ? 0x80 : 0);
   //pyboy tiene otra implementacion de RRCA
   //flags
   flags[0] = false;
   flags[1] = false;
   flags[2] = false;
   if (op === "RLCA" || op === "RLA") flags[3] = register > 0x7f;
-  if (op === "RRCA") flags[3] = (register & 0b1) === 1;
+  if (op === "RRCA" || op === "RRA") flags[3] = (register & 0b1) === 1;
 
   return result & 0xff;
 }
@@ -453,6 +639,7 @@ export function addSub(
   if (op === "add") result = register + value;
 
   //flags
+  //implementacion erronea de las flags en mi anterior emulador
   if (bits === 8) {
     flags[1] = (register & 0xf) + (value & 0xf) > 0xf;
   } else {
@@ -466,4 +653,38 @@ export function addSub(
 
 export function STOPinstruction(nextbyte: number) {
   //TODO: implementar
+}
+
+export function JR(byte: number) {
+  //byte > 0x7f ? byte - 0x100 : byte o (byte ^ 0x80) - 0x80 otras formas de hacerlo signed
+  const signed = (byte << 24) >> 24;
+  return signed;
+}
+
+export function DAA(register: number, flags: boolean[]) {
+  let adjust = 0;
+  if (!flags[2]) {
+    if (flags[3] || register > 0x99) {
+      adjust |= 0x60;
+      flags[3] = true;
+    }
+    if (flags[1] || (register & 0xf) > 0x9) {
+      adjust |= 0x6;
+    }
+
+    register += adjust;
+  } else {
+    if (flags[3]) {
+      adjust |= 0x9a;
+    }
+    if (flags[1]) {
+      adjust |= 0xa;
+    }
+    register -= adjust;
+    //a revisar
+  }
+  flags[1] = false;
+  flags[0] = (register & 0xff) === 0;
+  flags[3] = adjust >= 0x100;
+  register &= 0xff;
 }
