@@ -23,6 +23,7 @@ export class Components {
   gbcmode: boolean;
   stop: boolean;
   halt: boolean;
+  IME: boolean;
 
   constructor(debug?: boolean) {
     this.debug = debug || false;
@@ -31,6 +32,7 @@ export class Components {
     this.gbcmode = false;
     this.stop = false;
     this.halt = false;
+    this.IME = false;
 
     this.memory = new Memory();
     this.cartridge = new Cartridge();
@@ -40,6 +42,7 @@ export class Components {
       this.gbcmode,
       this.stop,
       this.halt,
+      this.IME,
     ]);
     this.ppu = new PPU();
     this.apu = new APU();
