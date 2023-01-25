@@ -6,6 +6,7 @@ import { PPU } from "./ppu";
 import { APU } from "./apu";
 import { Controller } from "./controller";
 import { LinkCable } from "./linkcable";
+import { sysctrl } from "@/tools/SystemControl";
 
 export class Components {
   cartridge: Cartridge;
@@ -21,26 +22,27 @@ export class Components {
   cycles: number;
   doubleSpeed: boolean;
   gbcmode: boolean;
-  stop: boolean;
+  cpu_stop: boolean;
   halt: boolean;
   IME: boolean;
 
   constructor(debug?: boolean) {
     this.debug = debug || false;
+    sysctrl.isDebug = this.debug;
     this.cycles = 0;
     this.doubleSpeed = false;
     this.gbcmode = false;
-    this.stop = false;
+    this.cpu_stop = false;
     this.halt = false;
     this.IME = false;
 
-    this.memory = new Memory();
+    this.memory = new Memory(this.gbcmode);
     this.cartridge = new Cartridge();
     this.bootrom = new Bootrom();
     this.cpu = new CPU(this.memory, this.cycles, [
       this.doubleSpeed,
       this.gbcmode,
-      this.stop,
+      this.cpu_stop,
       this.halt,
       this.IME,
     ]);
@@ -53,7 +55,7 @@ export class Components {
   reset() {
     this.cartridge = new Cartridge();
     this.bootrom = new Bootrom();
-    this.memory = new Memory();
+    this.memory = new Memory(this.gbcmode);
     this.cycles = 0;
     this.doubleSpeed = false;
   }

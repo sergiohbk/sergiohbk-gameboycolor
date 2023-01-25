@@ -1,5 +1,8 @@
 import { MBC } from "./MBC";
+import { Cartridge } from "../cartridge";
 
-export class ROMonly implements MBC {
-  constructor() {}
+export class ROMonly extends MBC implements MBC {
+  constructor(cardridge: Cartridge) {
+    super(cardridge);
+  }
 }

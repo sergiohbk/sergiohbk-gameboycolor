@@ -1,5 +1,16 @@
-import { Cartridge } from "./cartridge";
+import { sysctrl } from "@/tools/SystemControl";
 import { Memory } from "./memory";
+
+enum CPUstate {
+  INSTRUCTION,
+  HALT,
+  STOP,
+  INTERRUPT,
+  INTERRUPT_WAIT,
+  TIMER,
+  WAIT,
+  COLLAPSED,
+}
 
 export class CPU {
   // dependencies
@@ -20,7 +31,6 @@ export class CPU {
   L: number; // L
   SP: number; // Stack Pointer
   PC: number; // Program Counter
-  stack: Array<Number>; // Stack
   zeroFlag: boolean; // Zero Flag
   subtractFlag: boolean; // Subtract Flag
   halfCarryFlag: boolean; // Half Carry Flag
@@ -49,8 +59,7 @@ export class CPU {
     this.subtractFlag = false;
     this.halfCarryFlag = false;
     this.carryFlag = false;
-    //quizas habra que cambiar la stack
-    this.stack = [];
+    CPUstate.WAIT;
   }
 
   // getters 16 bit registers
@@ -108,6 +117,7 @@ export class CPU {
     this.memory.mem[this.SP] = value;
     this.SP--;
     //a revisar si se resta antes o despues
+    if (sysctrl.isDebug) sysctrl.pushStack(value);
   }
 
   stackPush16bit(value: number) {
@@ -115,6 +125,7 @@ export class CPU {
     this.memory.mem[this.SP] = value >> 8;
     this.memory.mem[this.SP--] = value & 0xff;
     this.SP -= 2;
+    if (sysctrl.isDebug) sysctrl.pushStack(value);
   }
 
   stackPop8bit() {
@@ -123,6 +134,7 @@ export class CPU {
     }
 
     this.SP++;
+    if (sysctrl.isDebug) sysctrl.popStack();
     return this.memory.mem[this.SP];
   }
 
@@ -132,76 +144,8 @@ export class CPU {
     }
 
     this.SP += 2;
+    if (sysctrl.isDebug) sysctrl.popStack();
     return (this.memory.mem[this.SP] << 8) | this.memory.mem[this.SP--];
-  }
-
-  setRegisterValue(register: string, value: number) {
-    switch (register) {
-      case "A":
-        this.A = value;
-        break;
-      case "B":
-        this.B = value;
-        break;
-      case "C":
-        this.C = value;
-        break;
-      case "D":
-        this.D = value;
-        break;
-      case "E":
-        this.E = value;
-        break;
-      case "H":
-        this.H = value;
-        break;
-      case "L":
-        this.L = value;
-        break;
-      case "AF":
-        this.setAF(value);
-        break;
-      case "BC":
-        this.setBC(value);
-        break;
-      case "DE":
-        this.setDE(value);
-        break;
-      case "HL":
-        this.setHL(value);
-        break;
-      default:
-        throw new Error("Invalid register");
-    }
-  }
-
-  getRegisterValue(register: string) {
-    switch (register) {
-      case "A":
-        return this.A;
-      case "B":
-        return this.B;
-      case "C":
-        return this.C;
-      case "D":
-        return this.D;
-      case "E":
-        return this.E;
-      case "H":
-        return this.H;
-      case "L":
-        return this.L;
-      case "AF":
-        return this.getAF();
-      case "BC":
-        return this.getBC();
-      case "DE":
-        return this.getDE();
-      case "HL":
-        return this.getHL();
-      default:
-        throw new Error("Invalid register");
-    }
   }
 
   get8nextBits() {
@@ -217,10 +161,12 @@ export class CPU {
   }
 
   instructionSet(opcode: number) {
+    CPUstate.INSTRUCTION;
     switch (opcode) {
       case 0x00:
         //NOP
         this.cycles += 4;
+        if (sysctrl.isDebug) sysctrl.addInstruction(["NOP", this.PC]);
         break;
       case 0x01:
         //LD BC, d16

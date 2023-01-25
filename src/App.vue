@@ -1,5 +1,7 @@
 <template>
-  <MainPage></MainPage>
+  <div class="main">
+    <MainPage></MainPage>
+  </div>
 </template>
 
 <script lang="ts">
@@ -22,7 +24,7 @@ export default class App extends Vue { }
 }
 
 body {
-  --primary: #2E2E2E;
+  --primary: #191827;
   --buttons: #657beb;
   --secondary: #3E3E3E;
   --buttons-hover: #304cd8;
@@ -32,8 +34,13 @@ body {
   --important-buttons-active: #8e7ec8;
   color: white;
   background-color: var(--primary);
-  background-image: url(@/assets/gengar.png);
-  background-position: center;
-  background-size: contain;
+  margin: 2rem;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 </style>
