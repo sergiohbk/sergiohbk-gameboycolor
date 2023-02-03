@@ -1,5 +1,6 @@
 import { Cartridge } from "@/GAMEBOYCOLOR/cartridge";
 import { Memory } from "@/GAMEBOYCOLOR/memory";
+import { reactive } from "vue";
 
 export function getBanksFromRom(
   rom: Uint8ClampedArray,
@@ -31,3 +32,7 @@ export function setMBCtoMemory(memory: Memory, cartridge: Cartridge) {
   const mbcset = new cartridge.cardType[0]();
   memory.setMBC(mbcset);
 }
+
+export const uiopt = reactive({
+  uioption: "game",
+});

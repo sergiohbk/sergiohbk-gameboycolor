@@ -1,22 +1,22 @@
 <template>
     <div class="main">
         <div class="nav">
-            <span style="--i:0; --x:-1; --y:0">
-                <i class="bi bi-cpu"></i></span>
-            <span style="--i:0.5; --x:1; --y:0">
-                <i class="bi bi-stopwatch"></i></span>
-            <span style="--i:1; --x:0; --y:-1">
-                <i class="bi bi-gpu-card"></i></span>
-            <span style="--i:1.5; --x:0; --y:1">
-                <i class="bi bi-music-note-beamed"></i></span>
-            <span style="--i:2; --x:-1; --y:-1">
-                <i class="bi bi-controller"></i></span>
-            <span style="--i:2.5; --x:1; --y:1">
-                <i class="bi bi-sliders"></i></span>
-            <span style="--i:3; --x:-1; --y:1">
-                <i class="bi bi-signpost-2"></i></span>
-            <span style="--i:3.5; --x:1; --y:-1">
-                <i class="bi bi-motherboard"></i></span>
+            <span id="optSelect" style="--i:0; --x:-1; --y:0">
+                <i id="cpu" class="bi bi-cpu"></i></span>
+            <span id="optSelect" style="--i:0.5; --x:1; --y:0">
+                <i id="timer" class="bi bi-stopwatch"></i></span>
+            <span id="optSelect" style="--i:1; --x:0; --y:-1">
+                <i id="gpu" class="bi bi-gpu-card"></i></span>
+            <span id="optSelect" style="--i:1.5; --x:0; --y:1">
+                <i id="apu" class="bi bi-music-note-beamed"></i></span>
+            <span id="optSelect" style="--i:2; --x:-1; --y:-1">
+                <i id="game" class="bi bi-controller"></i></span>
+            <span id="optSelect" style="--i:2.5; --x:1; --y:1">
+                <i id="general" class="bi bi-sliders"></i></span>
+            <span id="optSelect" style="--i:3; --x:-1; --y:1">
+                <i id="interrupts" class="bi bi-signpost-2"></i></span>
+            <span id="optSelect" style="--i:3.5; --x:1; --y:-1">
+                <i id="memory" class="bi bi-sd-card"></i></span>
         </div>
         <div class="close">
             <i class="bi bi-x"></i>
@@ -24,31 +24,43 @@
     </div>
 </template>
 <script lang="ts">
-import { onMounted, ref } from "@vue/runtime-core";
+import { onMounted } from "@vue/runtime-core";
+import { uiopt } from '@/tools/data';
 
 export default {
     name: "OptionSelect",
     setup() {
-        const nav = ref<HTMLElement | null>(null);
-        const close = ref<HTMLElement | null>(null);
-
+        let nav: HTMLElement | null = null;
+        let close: HTMLElement | null = null;
+        let spans: HTMLSpanElement[] = [];
         onMounted(() => {
-            nav.value = document.querySelector(".nav");
-            close.value = document.querySelector(".close");
+            nav = document.querySelector(".nav");
+            close = document.querySelector(".close");
+            spans = Array.from(document.querySelectorAll('[id="optSelect"]'))
 
-            nav.value!.onclick = () => {
-                nav.value!.classList.add("active");
-                close.value!.classList.add("active");
+            nav!.onclick = () => {
+                nav!.classList.add("active");
+                close!.classList.add("active");
             };
-            close.value!.onclick = () => {
-                nav.value!.classList.remove("active");
-                close.value!.classList.remove("active");
+            close!.onclick = () => {
+                nav!.classList.remove("active");
+                close!.classList.remove("active");
             };
+            spans.map((span) => {
+                span.onclick = () => {
+                    document.querySelectorAll("i").forEach((i) => {
+                        i.classList.remove("selected");
+                    });
+                    span.querySelector("i")!.classList.add("selected");
+                    uiopt.uioption = span.querySelector("i")!.id;
+                };
+            });
         });
 
         return {
             nav,
             close,
+            spans
         };
     }
 }
@@ -107,6 +119,10 @@ export default {
 .nav.active span i {
     font-size: 2rem;
     color: rgb(255, 255, 255);
+}
+
+.nav.active span i.selected {
+    color: rgb(89, 114, 225);
 }
 
 .close {

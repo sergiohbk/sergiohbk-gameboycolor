@@ -27,12 +27,15 @@
             </div>
         </div>
         <OptionSelect></OptionSelect>
+        <GameOptions :GBC=GBC></GameOptions>
     </div>
 </template>
 <script lang="ts">
 import { GAMEBOYCOLOR } from "@/GAMEBOYCOLOR/gbc";
 import { onMounted, ref, watch, watchEffect } from '@vue/runtime-core';
-import OptionSelect from './OptionSelect.vue'
+import OptionSelect from './OptionSelect.vue';
+import { uiopt } from "@/tools/data";
+import GameOptions from './GameOptions.vue';
 
 export default ({
     name: "MainPage",
@@ -119,11 +122,13 @@ export default ({
             screen,
             fps,
             loadGame,
-            loadBoot
+            loadBoot,
+            uiopt
         }
     },
     components: {
-        OptionSelect
+        OptionSelect,
+        GameOptions
     }
 });
 </script>
