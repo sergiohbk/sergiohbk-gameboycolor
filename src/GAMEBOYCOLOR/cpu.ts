@@ -2,14 +2,14 @@ import { sysctrl } from "@/tools/SystemControl";
 import { Memory } from "./memory";
 
 enum CPUstate {
-  INSTRUCTION,
-  HALT,
-  STOP,
-  INTERRUPT,
-  INTERRUPT_WAIT,
-  TIMER,
-  WAIT,
-  COLLAPSED,
+  INSTRUCTION = "INSTRUCTION",
+  HALT = "HALT",
+  STOP = "STOP",
+  INTERRUPT = "INTERRUPT",
+  INTERRUPT_WAIT = "INTERRUPT_WAIT",
+  TIMER = "TIMER",
+  WAIT = "WAIT",
+  COLLAPSED = "COLLAPSED",
 }
 
 export class CPU {
@@ -35,6 +35,7 @@ export class CPU {
   subtractFlag: boolean; // Subtract Flag
   halfCarryFlag: boolean; // Half Carry Flag
   carryFlag: boolean; // Carry Flag
+  CPUSTATE: CPUstate;
 
   constructor(memory: Memory, cycles: number, params: boolean[]) {
     // dependencies
@@ -59,7 +60,7 @@ export class CPU {
     this.subtractFlag = false;
     this.halfCarryFlag = false;
     this.carryFlag = false;
-    CPUstate.WAIT;
+    this.CPUSTATE = CPUstate.WAIT;
   }
 
   // getters 16 bit registers
@@ -161,7 +162,7 @@ export class CPU {
   }
 
   instructionSet(opcode: number) {
-    CPUstate.INSTRUCTION;
+    this.CPUSTATE = CPUstate.INSTRUCTION;
     switch (opcode) {
       case 0x00:
         //NOP

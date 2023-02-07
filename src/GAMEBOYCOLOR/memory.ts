@@ -5,10 +5,10 @@ import { MBC5 } from "./MBCs/MBC5";
 import { ROMonly } from "./MBCs/ROMonly";
 
 enum MemState {
-  WRITE,
-  READ,
-  WAIT,
-  RESET,
+  WRITE = "WRITE",
+  READ = "READ",
+  WAIT = "WAIT",
+  RESET = "RESET",
 }
 
 export class Memory {
@@ -26,6 +26,8 @@ export class Memory {
   mem: Uint8ClampedArray;
   LCDC: number;
   WRAMBank: number;
+  BootromStat: boolean;
+  MEMSTATE: MemState;
 
   constructor(gbcmode: boolean) {
     // dependencies
@@ -51,11 +53,12 @@ export class Memory {
 
     this.IE = 0x00;
     this.LCDC = 0x00;
-    this.WRAMBank = 1;
+    this.WRAMBank = 1; //0xFF70
+    this.BootromStat = false; //0xFF50
 
     this.resetAllMemory();
 
-    MemState.WAIT;
+    this.MEMSTATE = MemState.WAIT;
     // vectors
     //0000h,0008h,0010h,0018h,0020h,0028h,0030h,0038h – For RST instruction of CPU.
     //0040h,0048h,0050h,0058h,0060h – Interrupt Vectors (VBL,LCD,Timer,Serial,Joypad)
@@ -66,7 +69,7 @@ export class Memory {
   }
 
   resetAllMemory() {
-    MemState.RESET;
+    this.MEMSTATE = MemState.RESET;
     this.mem.fill(0xff);
     this.VRAM[0].fill(0xff);
     this.VRAM[1].fill(0xff);
@@ -85,7 +88,7 @@ export class Memory {
   }
 
   write(address: number, value: number) {
-    MemState.WRITE;
+    this.MEMSTATE = MemState.WRITE;
     if (address > 0xffff) {
       throw new Error("Address is greater than 0xffff");
     }
@@ -126,11 +129,17 @@ export class Memory {
       //unusable
       return;
     }
-    if (address === 0xff70) {
-      this.selectWRAMBank(value & 0x7);
-    }
+
     if (address >= 0xff00 && address <= 0xff7f) {
       //IO registers
+      if (address === 0xff50) {
+        this.BootromStat = value ? true : false;
+        return;
+      }
+      if (address === 0xff70) {
+        this.selectWRAMBank(value & 0x7);
+        return;
+      }
       return;
     }
     if (address >= 0xff80 && address <= 0xfffe) {
@@ -144,7 +153,7 @@ export class Memory {
   }
 
   read(address: number): number {
-    MemState.READ;
+    this.MEMSTATE = MemState.READ;
     if (address <= 0x3fff) {
       return this.MemoryMap!.readRomBank00(address);
     }
@@ -167,27 +176,29 @@ export class Memory {
     }
     if (address >= 0xe000 && address <= 0xfdff) {
       //echo ram
-      0xff;
+      return 0xff;
     }
     if (address >= 0xfe00 && address <= 0xfe9f) {
       //sprite attribute table
-      this.OAM[address - 0xfe00];
+      return this.OAM[address - 0xfe00];
     }
     if (address >= 0xfea0 && address <= 0xfeff) {
       //unusable
-      0xff;
+      return 0xff;
     }
     if (address >= 0xff00 && address <= 0xff7f) {
       //io registers
-      0xff;
+      if (address === 0xff50) return this.BootromStat ? 1 : 0;
+      if (address === 0xff70) return this.WRAMBank;
+      return 0xff;
     }
     if (address >= 0xff80 && address <= 0xfffe) {
       //high ram
-      this.HIGHRAM[address - 0xff80];
+      return this.HIGHRAM[address - 0xff80];
     }
     if (address == 0xffff) {
       //interrupt enable register
-      this.IE;
+      return this.IE;
     }
 
     return 0xff;

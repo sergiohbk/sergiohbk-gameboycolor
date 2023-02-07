@@ -28,6 +28,8 @@
         </div>
         <OptionSelect></OptionSelect>
         <GameOptions :GBC=GBC></GameOptions>
+        <CpuOptions :GBC="GBC" :fps="fps"></CpuOptions>
+        <SettingsOptions @setDoubleSize="setDoubleSize" @setHalfSize="setHalfSize"></SettingsOptions>
     </div>
 </template>
 <script lang="ts">
@@ -36,6 +38,9 @@ import { onMounted, ref, watch, watchEffect } from '@vue/runtime-core';
 import OptionSelect from './OptionSelect.vue';
 import { uiopt } from "@/tools/data";
 import GameOptions from './GameOptions.vue';
+import CpuOptions from "./CpuOptions.vue";
+import SettingsOptions from "./SettingsOptions.vue";
+import "./css/index.css"
 
 export default ({
     name: "MainPage",
@@ -101,6 +106,7 @@ export default ({
         }
 
         function setDoubleSize() {
+            console.log("ejecuta la funcion")
             screenHeight.value = `${parseInt(screenHeight.value) * 2}px`;
             screenWidth.value = `${parseInt(screenWidth.value) * 2}px`;
         }
@@ -116,19 +122,23 @@ export default ({
             screenHeight,
             screenWidth,
             GBC,
-            setHalfSize,
-            setDoubleSize,
             setDebug,
             screen,
             fps,
             loadGame,
             loadBoot,
-            uiopt
+            uiopt,
+            SettingsOptions,
+            setDoubleSize,
+            setHalfSize
         }
     },
+
     components: {
         OptionSelect,
-        GameOptions
+        GameOptions,
+        CpuOptions,
+        SettingsOptions
     }
 });
 </script>
