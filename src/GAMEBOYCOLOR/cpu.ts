@@ -13,7 +13,7 @@ enum CPUstate {
 }
 
 export class CPU {
-  // dependencies
+  //----DEPENDENCIES----
   memory: Memory;
   cycles: number;
   doubleSpeed: boolean;
@@ -21,7 +21,7 @@ export class CPU {
   halt: boolean;
   stop: boolean;
   IME: boolean;
-  // Registers
+  //----REGISTERS----
   A: number; // Accumulator
   B: number; // B
   C: number; // C
@@ -29,16 +29,19 @@ export class CPU {
   E: number; // E
   H: number; // H
   L: number; // L
-  SP: number; // Stack Pointer
-  PC: number; // Program Counter
+  //----FLAGS----
   zeroFlag: boolean; // Zero Flag
   subtractFlag: boolean; // Subtract Flag
   halfCarryFlag: boolean; // Half Carry Flag
   carryFlag: boolean; // Carry Flag
+  //----FLOW CONTROL----
+  SP: number; // Stack Pointer
+  PC: number; // Program Counter
+
   CPUSTATE: CPUstate;
 
   constructor(memory: Memory, cycles: number, params: boolean[]) {
-    // dependencies
+    //----DEPENDENCIES----
     this.memory = memory;
     this.cycles = cycles;
     this.doubleSpeed = params[0];
@@ -46,7 +49,7 @@ export class CPU {
     this.halt = params[3];
     this.stop = params[2];
     this.IME = params[4];
-    // registers
+    // REGISTERS
     this.A = 0;
     this.B = 0;
     this.C = 0;
@@ -54,16 +57,49 @@ export class CPU {
     this.E = 0;
     this.H = 0;
     this.L = 0;
-    this.SP = 0;
-    this.PC = 0;
+    //----FLAGS----
     this.zeroFlag = false;
     this.subtractFlag = false;
     this.halfCarryFlag = false;
     this.carryFlag = false;
+    //----FLOW CONTROL----
+    this.SP = 0;
+    this.PC = 0;
+
     this.CPUSTATE = CPUstate.WAIT;
   }
 
-  // getters 16 bit registers
+  tick() {
+    this.execute();
+  }
+
+  fetch(): number {
+    if (this.PC < 0x8000 && this.PC) return this.memory.read(this.PC);
+    else
+      throw new Error(`the program counter try to fetch from ${this.PC} but 
+      the address is more than 0x7FFF`);
+  }
+
+  decode(opcode: number) {
+    if (sysctrl.isDebug)
+      sysctrl.addInstruction({
+        opcode: opcode,
+        pc: this.PC,
+        cycles: this.cycles,
+      });
+    if (opcode !== undefined) this.instructionSet(opcode);
+    else
+      throw new Error(
+        `the opcode given is undefined, there are maybe a error in fetch`
+      );
+  }
+
+  execute() {
+    const opcode = this.fetch();
+    this.decode(opcode);
+  }
+
+  //----GET16BITREGISTER----
   getAF() {
     let value: number = 0;
     value = this.A << 8;
@@ -86,7 +122,7 @@ export class CPU {
     return (this.H << 8) | this.L;
   }
 
-  // setters 16 bit registers
+  //----SET16BITREGISTER----
   setAF(value: number) {
     value &= 0xffff;
     this.A = value >> 8;
@@ -113,14 +149,14 @@ export class CPU {
     this.H = value >> 8;
     this.L = value & 0xff;
   }
-
+  //----STACKPUSH8BIT----
   stackPush8bit(value: number) {
     this.memory.mem[this.SP] = value;
     this.SP--;
     //a revisar si se resta antes o despues
     if (sysctrl.isDebug) sysctrl.pushStack(value);
   }
-
+  //----STACKPUSH16BIT----
   stackPush16bit(value: number) {
     value &= 0xffff;
     this.memory.mem[this.SP] = value >> 8;
@@ -128,7 +164,7 @@ export class CPU {
     this.SP -= 2;
     if (sysctrl.isDebug) sysctrl.pushStack(value);
   }
-
+  //----STACKPOP8BIT----
   stackPop8bit() {
     if (this.SP > 0xfffe) {
       throw new Error("Stack overflow");
@@ -138,7 +174,7 @@ export class CPU {
     if (sysctrl.isDebug) sysctrl.popStack();
     return this.memory.mem[this.SP];
   }
-
+  //----STACKPOP16BIT----
   stackPop16bit() {
     if (this.SP > 0xfffe) {
       throw new Error("Stack overflow");
@@ -148,26 +184,26 @@ export class CPU {
     if (sysctrl.isDebug) sysctrl.popStack();
     return (this.memory.mem[this.SP] << 8) | this.memory.mem[this.SP--];
   }
-
+  //----8NEXTBITSDATA----
   get8nextBits() {
     return this.memory.read(this.PC++);
   }
+  //----16NEXTBITSDATA----
   get16nextBits() {
     return (this.memory.read(this.PC + 2) << 8) | this.memory.read(this.PC++);
   }
-
+  //----PROGRAM COUNTER INCREMENT----
   pcIncrement(increment: number) {
     this.PC += increment;
     this.PC &= 0xffff;
   }
-
+  //----INSTRUCTIONS----
   instructionSet(opcode: number) {
     this.CPUSTATE = CPUstate.INSTRUCTION;
     switch (opcode) {
       case 0x00:
         //NOP
         this.cycles += 4;
-        if (sysctrl.isDebug) sysctrl.addInstruction(["NOP", this.PC]);
         break;
       case 0x01:
         //LD BC, d16
@@ -4360,6 +4396,7 @@ export function addSub(
 
 export function STOPinstruction(nextbyte: number) {
   //TODO: implementar
+  return;
 }
 
 export function JR(byte: number) {
@@ -4463,4 +4500,5 @@ export function miscelaneous(
 
 export function halt() {
   //TODO: implementar
+  return;
 }

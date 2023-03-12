@@ -9,36 +9,43 @@ import { LinkCable } from "./linkcable";
 import { sysctrl } from "@/tools/SystemControl";
 
 export class Components {
+  //----EXTERNAL COMPONENTS----
   cartridge: Cartridge;
   bootrom: Bootrom;
+  linkcable: LinkCable;
+  //----INTERNAL COMPONENTS----
   memory: Memory;
   cpu: CPU;
   ppu: PPU;
   apu: APU;
   controller: Controller;
-  linkcable: LinkCable;
-
-  debug: boolean;
+  //----CONSOLE FLOW CONTROL----
   cycles: number;
   doubleSpeed: boolean;
   gbcmode: boolean;
   cpu_stop: boolean;
   halt: boolean;
+  //----INTERRUPT CONTROL----
   IME: boolean;
+
+  debug: boolean;
 
   constructor(debug?: boolean) {
     this.debug = debug || false;
     sysctrl.isDebug = this.debug;
+    //----CONSOLE FLOW CONTROL----
     this.cycles = 0;
     this.doubleSpeed = false;
     this.gbcmode = false;
     this.cpu_stop = false;
     this.halt = false;
     this.IME = false;
-
-    this.memory = new Memory(this.gbcmode);
+    //EXTERNAL COMPONENTS
     this.cartridge = new Cartridge();
     this.bootrom = new Bootrom();
+    this.linkcable = new LinkCable();
+    //----INTERNAL COMPONENTS----
+    this.memory = new Memory(this.gbcmode);
     this.cpu = new CPU(this.memory, this.cycles, [
       this.doubleSpeed,
       this.gbcmode,
@@ -49,7 +56,6 @@ export class Components {
     this.ppu = new PPU();
     this.apu = new APU();
     this.controller = new Controller();
-    this.linkcable = new LinkCable();
   }
 
   reset() {

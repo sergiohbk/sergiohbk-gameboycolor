@@ -34,8 +34,8 @@ export class GAMEBOYCOLOR extends Components {
   }
 
   start() {
-    this.GBCSTATE = GBCstate.ON;
     if (this.isStarted) return;
+    this.GBCSTATE = GBCstate.ON;
     this.isStarted = true;
     this.update();
   }
@@ -64,7 +64,7 @@ export class GAMEBOYCOLOR extends Components {
       requestAnimationFrame((time) => runframe(time));
     };
   }
-
+  
   stop() {
     this.GBCSTATE = GBCstate.STOPPED;
     this.isStarted = false;
@@ -78,25 +78,25 @@ export class GAMEBOYCOLOR extends Components {
     this.cartridge.setRom(rom);
     setMBCtoMemory(this.memory, this.cartridge);
   }
-
+  
   loadBootrom(bootromvar: ArrayBuffer) {
     this.GBCSTATE = GBCstate.LOADBOOTROM;
     const rom = new Uint8ClampedArray(bootromvar);
     this.bootrom.setRom(rom);
   }
-
+  
   pause() {
     this.GBCSTATE = GBCstate.PAUSED;
     this.paused = true;
     this.fps = 0;
   }
-
+ 
   resume() {
     this.GBCSTATE = GBCstate.RUNNING;
     this.paused = false;
     this.update();
   }
-
+  
   reset() {
     this.GBCSTATE = GBCstate.RESET;
     super.reset();
