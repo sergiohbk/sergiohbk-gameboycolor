@@ -64,7 +64,7 @@ export class CPU {
     this.carryFlag = false;
     //----FLOW CONTROL----
     this.SP = 0;
-    this.PC = 0;
+    this.PC = 0x100;
 
     this.CPUSTATE = CPUstate.WAIT;
   }

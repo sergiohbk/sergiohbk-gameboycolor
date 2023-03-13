@@ -1,4 +1,3 @@
-import { setMBCtoMemory } from "@/tools/data";
 import { Components } from "./components";
 
 enum GBCstate {
@@ -20,11 +19,13 @@ export class GAMEBOYCOLOR extends Components {
   isStarted: boolean;
   paused: boolean;
   GBCSTATE: GBCstate;
+  maxCycles: number;
 
   constructor(canvas: HTMLCanvasElement, debugMode: boolean) {
     super(debugMode);
     this.canvas = canvas;
     this.maxFps = 1000 / 59.7;
+    this.maxCycles = 70224;
 
     this.debugMode = debugMode;
     this.isStarted = false;
@@ -56,7 +57,9 @@ export class GAMEBOYCOLOR extends Components {
       if (elapsed > this.maxFps) {
         lastUpdateTime = now - (elapsed % this.maxFps);
         //gameboy color logic here
-
+        while (this.cycles < this.maxCycles) {
+          this.cpu.tick();
+        }
         this.fps =
           Math.round((1000 / ((now - startTime) / ++frameCount)) * 100) / 100;
       }
@@ -76,7 +79,8 @@ export class GAMEBOYCOLOR extends Components {
     this.GBCSTATE = GBCstate.LOADGAME;
     const rom = new Uint8ClampedArray(game);
     this.cartridge.setRom(rom);
-    setMBCtoMemory(this.memory, this.cartridge);
+    this.setMBCtoMemory();
+    //quitar las ref, usar mejor en su lugar watch effect
   }
   
   loadBootrom(bootromvar: ArrayBuffer) {

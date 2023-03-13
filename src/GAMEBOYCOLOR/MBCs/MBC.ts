@@ -1,4 +1,5 @@
 export interface MBC {
+  name:string
   readRomBank00(address: number): number;
   readRomBankNN(address: number): number;
   externalRamRead(address: number): number;
@@ -9,6 +10,7 @@ import { Cartridge } from "../cartridge";
 export class MBC implements MBC {
   cartridge: Cartridge;
   constructor(cardridge: Cartridge) {
+    this.name = "MBC"
     this.cartridge = cardridge;
   }
 

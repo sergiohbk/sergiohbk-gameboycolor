@@ -24,15 +24,6 @@ export function createRamBanks(
   return ramBanks;
 }
 
-export function setMBCtoMemory(memory: Memory, cartridge: Cartridge) {
-  if (cartridge.cardType[0] === null) {
-    console.log("MBC not supported");
-    return;
-  }
-  const mbcset = new cartridge.cardType[0]();
-  memory.setMBC(mbcset);
-}
-
 export const uiopt = reactive({
   uioption: "game",
 });

@@ -53,7 +53,7 @@ export class Components {
       this.halt,
       this.IME,
     ]);
-    this.ppu = new PPU();
+    this.ppu = new PPU(this.memory);
     this.apu = new APU();
     this.controller = new Controller();
   }
@@ -64,5 +64,13 @@ export class Components {
     this.memory = new Memory(this.gbcmode);
     this.cycles = 0;
     this.doubleSpeed = false;
+  }
+
+  setMBCtoMemory() {
+    if (this.cartridge.cardType[0] === null) {
+      console.log("MBC not supported");
+      return;
+    }
+    this.memory.MemoryMap = new this.cartridge.cardType[0](this.cartridge);
   }
 }
