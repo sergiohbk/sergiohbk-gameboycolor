@@ -18,8 +18,8 @@
                 <button class="ibutton" onclick="document.getElementById('inputboot').click()"><span>Cargar
                         GAMEBOYCOLOR intro</span></button>
             </div>
-            <span v-if="GBC?.cartridge.isRomLoaded" class="title">Control del juego</span>
-            <div v-if="GBC?.cartridge.isRomLoaded" class="flexrow">
+            <span v-if="romLoaded" class="title">Control del juego</span>
+            <div v-if="romLoaded" class="flexrow">
                 <button @click="GBC?.start"><span>start</span></button>
                 <button @click="GBC?.stop"><span>stop</span></button>
                 <button v-if="debug" @click="GBC?.pause"><span>pause</span></button>
@@ -48,28 +48,30 @@ export default ({
         let debug = ref<boolean>(true)
         let screenHeight = ref<string>("320px")
         let screenWidth = ref<string>("288px")
-        let GBC = ref<GAMEBOYCOLOR | null>(null)
+        let GBC : GAMEBOYCOLOR = new GAMEBOYCOLOR(debug.value)
         let fps = ref<number>(0)
+        let romLoaded = ref<boolean>(false)
 
         onMounted(() => {
-            GBC.value = new GAMEBOYCOLOR(document.getElementById('screen') as HTMLCanvasElement, debug.value)
+            GBC.assingCanvas(document.getElementById('screen') as HTMLCanvasElement)
         })
 
-        watch(() => GBC.value?.debugMode, () => {
+        watch(() => GBC?.debugMode, () => {
             if (GBC) {
-                debug.value = GBC.value!.debugMode
+                debug.value = GBC!.debugMode
             }
         })
 
         watchEffect(() => {
             setInterval(() => {
-                fps.value = Math.trunc(GBC.value!.fps)
-            }, 500)
+                fps.value = Math.trunc(GBC!.fps)
+                romLoaded.value = GBC!.cartridge.isRomLoaded
+            }, 1000)
         })
 
         function loadGame(event: any) {
             if (GBC) {
-                GBC.value!.reset()
+                //GBC!.reset()
                 const file = event.target.files[0];
                 if (!file) return;
                 if (file.name.split('.').pop() !== 'gb' && file.name.split('.').pop() !== 'gbc') {
@@ -79,7 +81,7 @@ export default ({
                 const reader = new FileReader();
                 reader.readAsArrayBuffer(file);
                 reader.onload = () => {
-                    GBC.value!.load(reader.result as ArrayBuffer)
+                    GBC!.load(reader.result as ArrayBuffer)
                 }
             }
         }
@@ -95,7 +97,7 @@ export default ({
                 const reader = new FileReader();
                 reader.readAsArrayBuffer(file);
                 reader.onload = () => {
-                    GBC.value!.loadBootrom(reader.result as ArrayBuffer)
+                    GBC!.loadBootrom(reader.result as ArrayBuffer)
                 }
             }
         }
@@ -113,7 +115,7 @@ export default ({
 
         function setDebug() {
             if (GBC) {
-                GBC.value!.debugMode = !GBC.value!.debugMode
+                GBC!.debugMode = !GBC!.debugMode
             }
         }
 
@@ -125,6 +127,7 @@ export default ({
             setDebug,
             screen,
             fps,
+            romLoaded,
             loadGame,
             loadBoot,
             uiopt,

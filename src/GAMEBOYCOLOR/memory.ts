@@ -118,7 +118,6 @@ export class Memory extends MemoryData {
     this.MEMSTATE = MemState.READ;
     //----ROM BANK 00----
     if (address <= 0x3fff) {
-      console.log("nombre" + this.MemoryMap?.name)
       return this.MemoryMap!.readRomBank00(address);
     }
     //----ROM BANK NN----

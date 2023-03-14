@@ -40,7 +40,7 @@ export class Components {
     this.cpu_stop = false;
     this.halt = false;
     this.IME = false;
-    //EXTERNAL COMPONENTS
+    //----EXTERNAL COMPONENTS----
     this.cartridge = new Cartridge();
     this.bootrom = new Bootrom();
     this.linkcable = new LinkCable();
@@ -59,6 +59,8 @@ export class Components {
   }
 
   reset() {
+    /*cambiar la funcion reset a funcion de reseteo
+    de cada clase para no borrar las referencias*/
     this.cartridge = new Cartridge();
     this.bootrom = new Bootrom();
     this.memory = new Memory(this.gbcmode);

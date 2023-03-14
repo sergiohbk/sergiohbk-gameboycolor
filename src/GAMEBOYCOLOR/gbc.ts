@@ -12,7 +12,7 @@ enum GBCstate {
 }
 
 export class GAMEBOYCOLOR extends Components {
-  canvas: HTMLCanvasElement;
+  canvas: HTMLCanvasElement | null;
   debugMode: boolean;
   fps: number;
   maxFps: number;
@@ -21,9 +21,9 @@ export class GAMEBOYCOLOR extends Components {
   GBCSTATE: GBCstate;
   maxCycles: number;
 
-  constructor(canvas: HTMLCanvasElement, debugMode: boolean) {
+  constructor(debugMode: boolean) {
     super(debugMode);
-    this.canvas = canvas;
+    this.canvas = null;
     this.maxFps = 1000 / 59.7;
     this.maxCycles = 70224;
 
@@ -80,13 +80,16 @@ export class GAMEBOYCOLOR extends Components {
     const rom = new Uint8ClampedArray(game);
     this.cartridge.setRom(rom);
     this.setMBCtoMemory();
-    //quitar las ref, usar mejor en su lugar watch effect
   }
   
   loadBootrom(bootromvar: ArrayBuffer) {
     this.GBCSTATE = GBCstate.LOADBOOTROM;
     const rom = new Uint8ClampedArray(bootromvar);
     this.bootrom.setRom(rom);
+  }
+
+  assingCanvas(canvas : HTMLCanvasElement) {
+    this.canvas = canvas;
   }
   
   pause() {
