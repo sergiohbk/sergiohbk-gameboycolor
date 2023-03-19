@@ -57,11 +57,13 @@ export class GAMEBOYCOLOR extends Components {
       if (elapsed > this.maxFps) {
         lastUpdateTime = now - (elapsed % this.maxFps);
         //gameboy color logic here
-        while (this.cycles < this.maxCycles) {
+        while (this.cycles.getCycles() <= this.maxCycles) {
           this.cpu.tick();
         }
         this.fps =
           Math.round((1000 / ((now - startTime) / ++frameCount)) * 100) / 100;
+        
+        this.cycles.setCycles(this.cycles.cycles %= this.maxCycles);
       }
 
       requestAnimationFrame((time) => runframe(time));

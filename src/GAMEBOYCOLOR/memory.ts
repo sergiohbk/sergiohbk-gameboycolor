@@ -4,6 +4,7 @@ import { MBC3 } from "./MBCs/MBC3";
 import { MBC30 } from "./MBCs/MBC30";
 import { MBC5 } from "./MBCs/MBC5";
 import { ROMonly } from "./MBCs/ROMonly";
+import { FLAGS } from "./generalFlags";
 
 enum MemState {
   WRITE = "WRITE",
@@ -13,13 +14,14 @@ enum MemState {
 }
 
 export class Memory extends MemoryData {
-  gbcmode: boolean;
-
+  //----DEPENDENCIES----
+  flags : FLAGS;
+  //----STATE----
   MEMSTATE: MemState;
 
-  constructor(gbcmode: boolean) {
+  constructor(flags: FLAGS) {
     super()
-    this.gbcmode = gbcmode;
+    this.flags = flags;
 
     //this.resetAllMemory();
     this.MEMSTATE = MemState.WAIT;
@@ -80,7 +82,7 @@ export class Memory extends MemoryData {
     }
     //----SWITCHABLE WORK RAM----
     if (address >= 0xd000 && address <= 0xdfff) {
-      if (this.gbcmode) this.SWWORKRAM[this.WRAMBank][address - 0xd000] = value;
+      if (this.flags.GBCmode) this.SWWORKRAM[this.WRAMBank][address - 0xd000] = value;
       else this.SWWORKRAM[0][address - 0xd000] = value;
       return;
     }
@@ -139,7 +141,7 @@ export class Memory extends MemoryData {
     }
     //----SWITCHABLE WORK RAM----
     if (address >= 0xd000 && address <= 0xdfff) {
-      if (this.gbcmode) return this.SWWORKRAM[this.WRAMBank][address - 0xd000];
+      if (this.flags.GBCmode) return this.SWWORKRAM[this.WRAMBank][address - 0xd000];
       else return this.SWWORKRAM[0][address - 0xd000];
     }
     //----ECHO RAM----
@@ -159,7 +161,20 @@ export class Memory extends MemoryData {
     if (address >= 0xff00 && address <= 0xff7f) {
       if (address === 0xff40) return this.LCDC;
       if (address === 0xff41) return this.LCDCSTAT;
+      if (address === 0xff42) return this.SCY;
+      if (address === 0xff43) return this.SCX;
+      if (address === 0xff44) return this.LY;
+      if (address === 0xff45) return this.LYC;
+      if (address === 0xff47) return this.BGP;
+      if (address === 0xff48) return this.OBP0;
+      if (address === 0xff49) return this.OBP1;
+      if (address === 0xff4A) return this.WY;
+      if (address === 0xff4B) return this.WX;
       if (address === 0xff50) return this.BootromStat ? 1 : 0;
+      if (address === 0xff68) return this.BCPS;
+      if (address === 0xff69) return this.BCPD;
+      if (address === 0xff6A) return this.OCPS;
+      if (address === 0xff6B) return this.OCPD;
       if (address === 0xff70) return this.WRAMBank;
       return 0xff;
     }
@@ -189,8 +204,48 @@ export class Memory extends MemoryData {
       this.LCDCSTAT = value;
       return;
     }
+    if (address === 0xFF42) {
+      this.SCY = value;
+      return;
+    }
+    if (address === 0xFF43) {
+      this.SCX = value;
+      return;
+    }
+    if (address === 0xFF44) {
+      this.LY = value;
+      return;
+    }
+    if (address === 0xFF45) {
+      this.LYC = value;
+      return;
+    }
+    if (address === 0xFF4A) {
+      this.WY = value;
+      return;
+    }
+    if (address === 0xFF4B) {
+      this.WX = value;
+      return;
+    }
     if (address === 0xff50) {
       this.BootromStat = value ? true : false;
+      return;
+    }
+    if (address === 0xFF68) {
+      this.BCPS = value;
+      return;
+    }
+    if (address === 0xFF69) {
+      this.BCPD = value;
+      return;
+    }
+    if (address === 0xFF6A) {
+      this.OCPS = value;
+      return;
+    }
+    if (address === 0xFF6B) {
+      this.OCPD = value;
       return;
     }
     if (address === 0xff70) {

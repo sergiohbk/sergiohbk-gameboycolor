@@ -20,6 +20,20 @@ export class MemoryData{
     //---------------GPU----------------
     LCDC: number; //0xFF40
     LCDCSTAT: number; //0xFF41
+    SCY: number; //0xFF42
+    SCX: number; //0xFF43
+    LY: number; //0xFF44
+    LYC: number; //0xFF45
+    WY: number; //0xFF4A
+    WX: number; //0xFF4B
+    //------------PALETTES-----------
+    BGP: number; //0xFF47
+    OBP0: number; //0xFF48
+    OBP1: number; //0xFF49
+    BCPS: number; //0xFF68
+    BCPD: number; //0xFF69
+    OCPS: number; //0xFF6A
+    OCPD: number; //0xFF6B
     //------------INTERRUPTS------------
     IE: number; // 0xFFFF
     //-------------GBC ONLY-------------
@@ -50,6 +64,20 @@ export class MemoryData{
         //datos para GPU
         this.LCDC = 0x00;
         this.LCDCSTAT = 0x00;
+        this.SCY = 0x00;
+        this.SCX = 0x00;
+        this.LY = 0x00;
+        this.LYC = 0x00;
+        this.WY = 0x00;
+        this.WX = 0x00;
+        //paletas de color
+        this.BGP = 0x00;
+        this.OBP0 = 0x00;
+        this.OBP1 = 0x00;
+        this.BCPS = 0x00;
+        this.BCPD = 0x00;
+        this.OCPS = 0x00;
+        this.OCPD = 0x00;
         //datos para interruptores
         this.IE = 0x00;
         //datos exclusivos de GBC
