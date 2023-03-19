@@ -109,6 +109,11 @@ export class Memory extends MemoryData {
       this.HIGHRAM[address - 0xff80] = value;
       return;
     }
+    //----INTERRUPT REQUEST REGISTER----
+    if (address === 0xff0f) {
+      this.IF = value;
+      return;
+    }
     //----INTERRUPT ENABLE REGISTER----
     if (address === 0xffff) {
       this.IE = value;
@@ -182,10 +187,10 @@ export class Memory extends MemoryData {
     if (address >= 0xff80 && address <= 0xfffe) {
       return this.HIGHRAM[address - 0xff80];
     }
+    //----INTERRUPT RESQUEST----
+    if (address === 0xff0f) return this.IF | 0xE0;
     //----INTERRUPT ENABLE REGISTER----
-    if (address == 0xffff) {
-      return this.IE;
-    }
+    if (address === 0xffff) return this.IE;
 
     return 0xff;
   }

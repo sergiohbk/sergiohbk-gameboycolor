@@ -35,6 +35,7 @@ export class MemoryData{
     OCPS: number; //0xFF6A
     OCPD: number; //0xFF6B
     //------------INTERRUPTS------------
+    IF: number; // 0xFF0F
     IE: number; // 0xFFFF
     //-------------GBC ONLY-------------
     WRAMBank: number; //0xFF70
@@ -79,8 +80,9 @@ export class MemoryData{
         this.OCPS = 0x00;
         this.OCPD = 0x00;
         //datos para interruptores
+        this.IF = 0x00;
         this.IE = 0x00;
         //datos exclusivos de GBC
-        this.WRAMBank = 1; //0xFF70
+        this.WRAMBank = 1;
     }
 }

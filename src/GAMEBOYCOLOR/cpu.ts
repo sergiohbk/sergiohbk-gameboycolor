@@ -2,6 +2,7 @@ import { sysctrl } from "@/tools/SystemControl";
 import { Memory } from "./memory";
 import { CYCLES } from "./cycles";
 import { FLAGS } from "./generalFlags";
+import { INTERRUPTS } from "./interrupts";
 
 enum CPUstate {
   INSTRUCTION = "INSTRUCTION",
@@ -14,7 +15,7 @@ enum CPUstate {
   COLLAPSED = "COLLAPSED",
 }
 
-export class CPU {
+export class CPU{
   //----DEPENDENCIES----
   memory: Memory;
   cycles: CYCLES;
@@ -35,6 +36,9 @@ export class CPU {
   //----FLOW CONTROL----
   SP: number; // Stack Pointer
   PC: number; // Program Counter
+  requestIE: boolean; //requiere activar el IME, pero se delayea 1 instruccion
+  //----COMPONENTS----
+  interrupts: INTERRUPTS
 
   CPUSTATE: CPUstate;
 
@@ -59,11 +63,15 @@ export class CPU {
     //----FLOW CONTROL----
     this.SP = 0;
     this.PC = 0x100;
+    this.requestIE = false;
+    //----COMPONENTS----
+    this.interrupts = new INTERRUPTS(this.memory,this,this.cycles)
 
     this.CPUSTATE = CPUstate.WAIT;
   }
 
   tick() {
+    this.interrupts.tick()
     this.execute();
   }
 
@@ -86,6 +94,11 @@ export class CPU {
       throw new Error(
         `the opcode given is undefined, there are maybe a error in fetch`
       );
+    if (this.requestIE) {
+      //la instruccion EI delayea la activacion en 1 instruccion
+      this.flags.IME = true;
+      this.requestIE = false;
+    }
   }
 
   execute() {
@@ -3193,7 +3206,7 @@ export class CPU {
         break;
       case 0xfb:
         //EI
-        this.flags.IME = true;
+        this.requestIE = true;
         this.cycles.sumCycles(4);
         break;
       case 0xfe:
