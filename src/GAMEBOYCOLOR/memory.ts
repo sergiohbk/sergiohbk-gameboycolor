@@ -67,7 +67,10 @@ export class Memory extends MemoryData {
     }
     //----VIDEO RAM----
     if (address >= 0x8000 && address <= 0x9fff) {
-      //write to VRAM, depends on GB or GBC
+      if (this.flags.GBCmode)
+        this.VRAM[this.VBK & 0x1][address - 0x8000] = value;
+      else
+        this.VRAM[0][address - 0x8000] = value;
       return;
     }
     //----EXTERNAL RAM----
@@ -133,8 +136,10 @@ export class Memory extends MemoryData {
     }
     //----VIDEO RAM----
     if (address >= 0x8000 && address <= 0x9fff) {
-      //return from VRAM, depends on GB or GBC
-      return 0xff;
+      if (this.flags.GBCmode)
+        return this.VRAM[this.VBK & 0x1][address - 0x8000];
+      else
+        return this.VRAM[0][address - 0x8000];
     }
     //----EXTERNAL RAM----
     if (address >= 0xa000 && address <= 0xbfff) {
@@ -175,6 +180,7 @@ export class Memory extends MemoryData {
       if (address === 0xff49) return this.OBP1;
       if (address === 0xff4A) return this.WY;
       if (address === 0xff4B) return this.WX;
+      if (address === 0xff4f) return this.VBK;
       if (address === 0xff50) return this.BootromStat ? 1 : 0;
       if (address === 0xff68) return this.BCPS;
       if (address === 0xff69) return this.BCPD;
@@ -231,6 +237,10 @@ export class Memory extends MemoryData {
     }
     if (address === 0xFF4B) {
       this.WX = value;
+      return;
+    }
+    if (address === 0xFF4B) {
+      this.VBK = value;
       return;
     }
     if (address === 0xff50) {

@@ -26,6 +26,7 @@ export class MemoryData{
     LYC: number; //0xFF45
     WY: number; //0xFF4A
     WX: number; //0xFF4B
+    VBK: number; //0xFF4F
     //------------PALETTES-----------
     BGP: number; //0xFF47
     OBP0: number; //0xFF48
@@ -37,7 +38,17 @@ export class MemoryData{
     //------------INTERRUPTS------------
     IF: number; // 0xFF0F
     IE: number; // 0xFFFF
-    //-------------GBC ONLY-------------
+    //------------CONTROLLER-----------
+    P1: number; //0xFF00 player one
+    //------------CABLE LINK-----------
+    SB: number; //0xFF01 serial data
+    SC: number; //0xFF02 serial control
+    //------------TIMER----------
+    DIV: number; //0xFF04 divider register
+    TAC: number; //0xFF07 timer control
+    TIMA: number; //0xFF05 timer counter
+    TMA: number; //0xFF06 timer modulo
+    //------------GBC ONLY-------------
     WRAMBank: number; //0xFF70
 
     constructor(){
@@ -71,6 +82,7 @@ export class MemoryData{
         this.LYC = 0x00;
         this.WY = 0x00;
         this.WX = 0x00;
+        this.VBK = 0x00;
         //paletas de color
         this.BGP = 0x00;
         this.OBP0 = 0x00;
@@ -82,6 +94,16 @@ export class MemoryData{
         //datos para interruptores
         this.IF = 0x00;
         this.IE = 0x00;
+        //datos de controles
+        this.P1 = 0x00;
+        //datos de serial
+        this.SB = 0x00;
+        this.SC = 0x00;
+        //datos de timer
+        this.DIV = 0x00;
+        this.TIMA = 0x00;
+        this.TMA = 0x00;
+        this.TAC = 0x00;
         //datos exclusivos de GBC
         this.WRAMBank = 1;
     }
