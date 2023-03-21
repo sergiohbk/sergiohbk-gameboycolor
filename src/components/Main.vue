@@ -7,6 +7,7 @@
                 </div>
                 <canvas id="screen"></canvas>
             </div>
+            <div ref="pixiContainer"></div>
         </div>
         <div class="flexcolumn">
             <span class="title">Opciones de juego</span>
@@ -34,26 +35,36 @@
 </template>
 <script lang="ts">
 import { GAMEBOYCOLOR } from "@/GAMEBOYCOLOR/gbc";
-import { onMounted, ref, watch, watchEffect } from '@vue/runtime-core';
+import { onMounted, onBeforeUnmount, ref, watch, watchEffect } from '@vue/runtime-core';
 import OptionSelect from './OptionSelect.vue';
 import { uiopt } from "@/tools/data";
 import GameOptions from './GameOptions.vue';
 import CpuOptions from "./CpuOptions.vue";
 import SettingsOptions from "./SettingsOptions.vue";
+import * as PIXI from 'pixi.js'
 import "./css/index.css"
+import { Application } from "pixi.js";
 
 export default ({
     name: "MainPage",
     setup() {
-        let debug = ref<boolean>(true)
-        let screenHeight = ref<string>("320px")
-        let screenWidth = ref<string>("288px")
-        let GBC : GAMEBOYCOLOR = new GAMEBOYCOLOR(debug.value)
-        let fps = ref<number>(0)
-        let romLoaded = ref<boolean>(false)
+        const debug = ref<boolean>(true)
+        const screenHeight = ref<string>("320px")
+        const screenWidth = ref<string>("288px")
+        const GBC : GAMEBOYCOLOR = new GAMEBOYCOLOR(debug.value)
+        const fps = ref<number>(0)
+        const romLoaded = ref<boolean>(false)
+        const pixiContainer = ref<HTMLDivElement | null>(null)
+        let app: Application | null
 
         onMounted(() => {
-            GBC.assingCanvas(document.getElementById('screen') as HTMLCanvasElement)
+            initPixi();
+            GBC.assignCanvas(document.getElementById('screen') as HTMLCanvasElement)
+            GBC.assignPixi(app as Application<PIXI.ICanvas>)
+        })
+
+        onBeforeUnmount(() => {
+            destroyPixi();
         })
 
         watch(() => GBC?.debugMode, () => {
@@ -119,6 +130,27 @@ export default ({
             }
         }
 
+        function initPixi() {
+            app = new PIXI.Application({
+                width: 160,
+                height: 144,
+                backgroundColor: 0xFFFFFF,
+            })
+
+            if (pixiContainer.value && app.view instanceof HTMLElement) {
+                pixiContainer.value.appendChild(app.view);
+            }
+        }
+
+        function destroyPixi() {
+            app!.destroy(true, {
+                children: true,
+                texture: true,
+                baseTexture: true,
+            });
+            app = null;
+        }
+
         return {
             debug,
             screenHeight,
@@ -133,7 +165,8 @@ export default ({
             uiopt,
             SettingsOptions,
             setDoubleSize,
-            setHalfSize
+            setHalfSize,
+            pixiContainer
         }
     },
 

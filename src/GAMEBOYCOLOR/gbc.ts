@@ -1,3 +1,4 @@
+import { Application, FORMATS, ICanvas, Sprite, Texture } from "pixi.js";
 import { Components } from "./components";
 
 enum GBCstate {
@@ -20,11 +21,17 @@ export class GAMEBOYCOLOR extends Components {
   paused: boolean;
   GBCSTATE: GBCstate;
   maxCycles: number;
+  //----screen----
+  sprite: Sprite;
+  textureBuffer: Uint8Array;
+  screenwidth: number;
+  screenheigth: number;
+  texture: Texture;
 
   constructor(debugMode: boolean) {
     super(debugMode);
     this.canvas = null;
-    this.maxFps = 1000 / 59.7;
+    this.maxFps = 59.7;
     this.maxCycles = 70224;
 
     this.debugMode = debugMode;
@@ -32,42 +39,37 @@ export class GAMEBOYCOLOR extends Components {
     this.fps = 0;
     this.paused = false;
     this.GBCSTATE = GBCstate.OFF;
+    //pantalla
+    this.screenheigth = 144;
+    this.screenwidth = 160;
+    this.textureBuffer = new Uint8Array(this.screenwidth * this.screenheigth * 4)
+    this.texture = Texture.fromBuffer(this.textureBuffer, this.screenwidth, this.screenheigth);
+    this.sprite = new Sprite(this.texture);
   }
 
   start() {
     if (this.isStarted) return;
+    if (!this.PIXI) return;
     this.GBCSTATE = GBCstate.ON;
     this.isStarted = true;
-    this.update();
+
+    this.PIXI.stage.addChild(this.sprite);
+    this.PIXI.ticker.maxFPS = this.maxFps;
+    this.PIXI.ticker.add((delta) => this.update(delta));
   }
 
-  update() {
-    this.GBCSTATE = GBCstate.RUNNING;
-    let lastUpdateTime: number = performance.now();
-    const startTime: number = performance.now();
-    let frameCount: number = 0;
+  update(delta: number) {
 
-    requestAnimationFrame((time) => runframe(time));
+    while (this.cycles.getCycles() <= this.maxCycles) {
+      this.cpu.tick();
+      this.ppu.tick();
+    }
 
-    const runframe = (time: number) => {
-      if (!this.isStarted || this.paused) return;
-      const now: number = time;
-      const elapsed: number = now - lastUpdateTime;
+    this.textureBuffer.set(this.ppu.getImageFrame());
+    this.sprite.texture.update();
 
-      if (elapsed > this.maxFps) {
-        lastUpdateTime = now - (elapsed % this.maxFps);
-        //gameboy color logic here
-        while (this.cycles.getCycles() <= this.maxCycles) {
-          this.cpu.tick();
-        }
-        this.fps =
-          Math.round((1000 / ((now - startTime) / ++frameCount)) * 100) / 100;
-        
-        this.cycles.setCycles(this.cycles.cycles %= this.maxCycles);
-      }
-
-      requestAnimationFrame((time) => runframe(time));
-    };
+    this.fps = Math.round((1 / delta) * this.PIXI!.ticker.FPS);
+    this.cycles.setCycles(this.cycles.cycles %= this.maxCycles);
   }
   
   stop() {
@@ -90,8 +92,13 @@ export class GAMEBOYCOLOR extends Components {
     this.bootrom.setRom(rom);
   }
 
-  assingCanvas(canvas : HTMLCanvasElement) {
+  assignCanvas(canvas : HTMLCanvasElement) {
     this.canvas = canvas;
+  }
+
+  assignPixi(PIXI: Application<ICanvas>) {
+    this.PIXI = PIXI;
+    this.ppu.assignPixi(this.PIXI);
   }
   
   pause() {
@@ -103,7 +110,6 @@ export class GAMEBOYCOLOR extends Components {
   resume() {
     this.GBCSTATE = GBCstate.RUNNING;
     this.paused = false;
-    this.update();
   }
   
   reset() {

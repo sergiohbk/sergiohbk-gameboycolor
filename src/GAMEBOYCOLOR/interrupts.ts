@@ -20,11 +20,10 @@ export class INTERRUPTS{
         if (interrupt === 0)
             return;
         
+        this.haltExit()
+        
         if (!this.memory.flags.IME)
             return;
-        
-        if (this.memory.flags.CPUhalt)
-            this.cycles.sumCycles(4)
         
         this.cpu.stackPush16bit(this.cpu.PC);
         this.memory.flags.IME = false;
@@ -52,5 +51,13 @@ export class INTERRUPTS{
                 this.memory.IF = this.memory.IF & 0xEF
                 break;
         }
+    }
+
+    haltExit() {
+        if (this.memory.flags.CPUhalt) {
+            this.memory.flags.CPUhalt = false;
+            this.cycles.sumCycles(4)
+        }
+        //halt bug implement here
     }
 }

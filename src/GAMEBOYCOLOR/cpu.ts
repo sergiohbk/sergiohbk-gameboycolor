@@ -71,7 +71,9 @@ export class CPU{
   }
 
   tick() {
+    if (this.stopTick()) return;
     this.interrupts.tick()
+    if (this.haltTick()) return;
     this.execute();
   }
 
@@ -3443,7 +3445,20 @@ export class CPU{
   }
 
   halt() {
-    //TODO: implementar
+    this.flags.CPUhalt = true;
     return;
+  }
+
+  haltTick() : boolean{
+    if (this.flags.CPUhalt) {
+      this.interrupts.tick();
+      return true;
+    }
+    return false
+    //a revisar
+  }
+
+  stopTick() : boolean {
+    return true;
   }
 }

@@ -9,6 +9,7 @@ import { LinkCable } from "./linkcable";
 import { sysctrl } from "@/tools/SystemControl";
 import { CYCLES } from "./cycles";
 import { FLAGS } from "./generalFlags";
+import { Application } from "pixi.js";
 
 export class Components {
   //----EXTERNAL COMPONENTS----
@@ -21,6 +22,7 @@ export class Components {
   ppu: PPU;
   apu: APU;
   controller: Controller;
+  PIXI: Application | null;
   //----CONSOLE FLOW----
   cycles: CYCLES;
   //----FLAGS----
@@ -43,6 +45,7 @@ export class Components {
     this.cpu = new CPU(this.memory, this.cycles, this.flags);
     this.ppu = new PPU(this.memory);
     this.apu = new APU();
+    this.PIXI = null;
     this.controller = new Controller();
   }
 
