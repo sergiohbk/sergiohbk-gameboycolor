@@ -20,7 +20,6 @@ export class GAMEBOYCOLOR extends Components {
   isStarted: boolean;
   paused: boolean;
   GBCSTATE: GBCstate;
-  maxCycles: number;
   //----screen----
   sprite: Sprite;
   textureBuffer: Uint8Array;
@@ -32,7 +31,6 @@ export class GAMEBOYCOLOR extends Components {
     super(debugMode);
     this.canvas = null;
     this.maxFps = 59.7;
-    this.maxCycles = 70224;
 
     this.debugMode = debugMode;
     this.isStarted = false;
@@ -60,7 +58,7 @@ export class GAMEBOYCOLOR extends Components {
 
   update(delta: number) {
 
-    while (this.cycles.getCycles() <= this.maxCycles) {
+    while (this.cycles.getCycles() <= this.cycles.cyclesToFrame) {
       this.cpu.tick();
       this.ppu.tick();
     }
@@ -69,7 +67,7 @@ export class GAMEBOYCOLOR extends Components {
     this.sprite.texture.update();
 
     this.fps = Math.round((1 / delta) * this.PIXI!.ticker.FPS);
-    this.cycles.setCycles(this.cycles.cycles %= this.maxCycles);
+    this.cycles.setCycles(this.cycles.cycles %= this.cycles.cyclesToFrame);
   }
   
   stop() {
